@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UnAuthorizedController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">product</a> &gt; <a href="index.source.html" class="el_package">cn.edu.xmu.oomall.product.controller</a> &gt; <span class="el_source">UnAuthorizedController.java</span></div><h1>UnAuthorizedController.java</h1><pre class="source lang-java linenums">//School of Informatics Xiamen University, GPL-3.0 license
+package cn.edu.xmu.oomall.product.controller;
+
+import cn.edu.xmu.javaee.core.model.ReturnObject;
+import cn.edu.xmu.javaee.core.model.vo.IdNameTypeVo;
+import cn.edu.xmu.javaee.core.model.vo.PageVo;
+import cn.edu.xmu.javaee.core.util.CloneFactory;
+import cn.edu.xmu.oomall.product.controller.vo.ProductVo;
+import cn.edu.xmu.oomall.product.controller.vo.SimpleProductVo;
+import cn.edu.xmu.oomall.product.dao.bo.Category;
+import cn.edu.xmu.oomall.product.dao.bo.Product;
+import cn.edu.xmu.oomall.product.service.CategoryService;
+import cn.edu.xmu.oomall.product.service.OnsaleService;
+import cn.edu.xmu.oomall.product.service.ProductService;
+import cn.edu.xmu.oomall.product.controller.vo.StateVo;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static cn.edu.xmu.javaee.core.model.Constants.PLATFORM;
+
+/**
+ * 商品控制器
+ * @author Ming Qiu
+ */
+@RestController /*Restful的Controller对象*/
+@RequestMapping(produces = &quot;application/json;charset=UTF-8&quot;)
+@RequiredArgsConstructor
+<span class="fc" id="L37">@Slf4j</span>
+public class UnAuthorizedController {
+
+    private final OnsaleService onsaleService;
+    private final ProductService productService;
+    private final CategoryService categoryService;
+
+    /**
+     * 获得商品信息
+     * @author Ming Qiu
+     * &lt;p&gt;
+     * date: 2022-12-04 19:19
+     * @param id
+     * @return
+     */
+    @GetMapping(&quot;/products/{id}&quot;)
+    @Transactional(propagation = Propagation.REQUIRED)
+    public ReturnObject findProductById(@PathVariable(&quot;id&quot;) Long id) {
+<span class="fc" id="L55">        Product product = this.productService.findProductById(PLATFORM, id);</span>
+<span class="fc" id="L56">        return new ReturnObject(new ProductVo(product));</span>
+    }
+
+    /**
+     * 获得商品的所有状态
+     * @return
+     */
+    @GetMapping(&quot;/products/states&quot;)
+    public ReturnObject getStates(){
+<span class="fc" id="L65">        return new ReturnObject(Product.STATUSNAMES.keySet().stream().map(code -&gt; StateVo.builder().name(Product.STATUSNAMES.get(code)).code(code).build()).collect(Collectors.toList()));</span>
+    }
+
+    /**
+     * 查询正式商品
+     * @return
+     */
+    @GetMapping(&quot;/products&quot;)
+    @Transactional(propagation = Propagation.REQUIRED)
+    public ReturnObject getProducts(@RequestParam Long shopId, @RequestParam String barCode, @RequestParam String name,
+                                   @RequestParam(required = false,defaultValue = &quot;1&quot;) Integer page,
+                                   @RequestParam(required = false,defaultValue = &quot;10&quot;) Integer pageSize){
+<span class="nc" id="L77">        List&lt;Product&gt; prodLists=this.productService.retrieveValidProducts(shopId, barCode, name, page, pageSize);</span>
+<span class="nc" id="L78">        List&lt;SimpleProductVo&gt; ret = prodLists.stream()</span>
+<span class="nc" id="L79">                .map(o -&gt; new SimpleProductVo(o))</span>
+<span class="nc" id="L80">                .collect(Collectors.toList());</span>
+<span class="nc" id="L81">        return new ReturnObject(new PageVo&lt;&gt;(ret, page, pageSize));</span>
+    }
+
+    /**
+     * 获得商品的历史信息
+     * @author Ming Qiu
+     * &lt;p&gt;
+     * date: 2022-12-04 19:19
+     * @param id
+     * @return
+     */
+    @GetMapping(&quot;/onsales/{id}&quot;)
+    @Transactional(propagation = Propagation.REQUIRED)
+    public ReturnObject findOnsaleById(@PathVariable(&quot;id&quot;) Long id){
+<span class="fc" id="L95">        Product product = this.productService.findByOnsaleId(id);</span>
+<span class="fc" id="L96">        ProductVo dto = new ProductVo(product);</span>
+<span class="fc" id="L97">        log.debug(&quot;findOnsaleById: dto = {}&quot;, dto);</span>
+<span class="fc" id="L98">        return new ReturnObject(dto);</span>
+    }
+
+    /**
+     * 获得二级分类
+     * @param id
+     * @return
+     */
+    @GetMapping(&quot;/categories/{id}/subcategories&quot;)
+    @Transactional(propagation = Propagation.REQUIRED)
+    public ReturnObject getSubCategories(@PathVariable(&quot;id&quot;) Long id) {
+<span class="fc" id="L109">        List&lt;Category&gt; categories = this.categoryService.retrieveSubCategories(id);</span>
+<span class="fc" id="L110">        return new ReturnObject(categories.stream().map(category -&gt; IdNameTypeVo.builder().id(category.getId()).name(category.getName()).build()).collect(Collectors.toList()));</span>
+    }
+
+    /**
+     * 查看活动中的商品
+     *
+     * @param id
+     * @param page
+     * @param pageSize
+     * @return
+     */
+    @GetMapping(&quot;/activities/{id}/onsales&quot;)
+    public ReturnObject getCouponActProduct(@PathVariable(&quot;id&quot;) Long id,
+                                            @RequestParam(required = false, defaultValue = &quot;1&quot;) Integer page,
+                                            @RequestParam(required = false, defaultValue = &quot;10&quot;) Integer pageSize) {
+<span class="nc" id="L125">        List&lt;Product&gt; productList = this.onsaleService.getCouponActProduct(id, page, pageSize);</span>
+<span class="nc" id="L126">        return new ReturnObject(productList.stream().map(product -&gt; new SimpleProductVo(product)).collect(Collectors.toList()));</span>
+    }
+
+
+    /**
+     * 查看分类下货品
+     *
+     * @param id  分类id
+     * @param page
+     * @param pageSize
+     * @return
+     */
+    @GetMapping(&quot;/subcategories/{id}/products&quot;)
+    public ReturnObject getCategoryProduct(   @PathVariable Long id,
+                                              @RequestParam(required = false,defaultValue = &quot;1&quot;) Integer page,
+                                              @RequestParam(required = false,defaultValue = &quot;10&quot;) Integer pageSize) {
+<span class="fc" id="L142">        List&lt;Product&gt; OnsaleList = this.productService.getCategoryProduct(id,page,pageSize);</span>
+<span class="pc" id="L143">        List&lt;SimpleProductVo&gt; collection=OnsaleList.stream().map(product -&gt; new SimpleProductVo(product)).collect(Collectors.toList());</span>
+<span class="fc" id="L144">        PageVo&lt;SimpleProductVo&gt; ret = new PageVo&lt;&gt;(collection, page, pageSize);</span>
+<span class="fc" id="L145">        return new ReturnObject(ret);</span>
+
+    }
+
+
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ComplexCouponLimitation.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">product</a> &gt; <a href="index.source.html" class="el_package">cn.edu.xmu.oomall.product.model.strategy.impl</a> &gt; <span class="el_source">ComplexCouponLimitation.java</span></div><h1>ComplexCouponLimitation.java</h1><pre class="source lang-java linenums">//School of Informatics Xiamen University, GPL-3.0 license
+package cn.edu.xmu.oomall.product.model.strategy.impl;
+
+import cn.edu.xmu.oomall.product.model.strategy.BaseCouponLimitation;
+import cn.edu.xmu.oomall.product.model.strategy.Item;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.Data;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+/**
+ * @author zhongyu wang 22920192204295
+ * 复合优惠限制类
+ * @author yuhao shi
+ *  *  2023-12-11
+ *  *  dgn2-010-syh
+ *  */
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@Data
+
+
+
+public class ComplexCouponLimitation extends BaseCouponLimitation implements Serializable {
+    private List&lt;BaseCouponLimitation&gt; couponLimitationList;
+    public ComplexCouponLimitation(){
+<span class="fc" id="L33">        super();</span>
+<span class="fc" id="L34">    }</span>
+    public ComplexCouponLimitation(BaseCouponLimitation... couponLimitations) {
+<span class="nc" id="L36">        super(0L);</span>
+<span class="nc" id="L37">        couponLimitationList = new ArrayList&lt;&gt;(couponLimitations.length);</span>
+<span class="nc" id="L38">        couponLimitationList.addAll(Arrays.asList(couponLimitations));</span>
+<span class="nc" id="L39">    }</span>
+
+
+    @Override
+    public BaseCouponLimitation readValues(String jsonString,String className) throws ClassNotFoundException, JsonProcessingException {
+<span class="fc" id="L44">        ObjectMapper mapper = new ObjectMapper();</span>
+<span class="fc" id="L45">        JsonNode root = mapper.readTree(jsonString);</span>
+<span class="fc" id="L46">        ComplexCouponLimitation complexCouponLimitation = new ComplexCouponLimitation();</span>
+<span class="fc" id="L47">        List&lt;BaseCouponLimitation&gt; couponLimitationList = new ArrayList&lt;&gt;();</span>
+
+<span class="fc" id="L49">        JsonNode couponLimitationNodeList = root.get(&quot;couponLimitationList&quot;);</span>
+<span class="pc bpc" id="L50" title="1 of 2 branches missed.">        if (couponLimitationNodeList != null) {</span>
+<span class="fc bfc" id="L51" title="All 2 branches covered.">            for (JsonNode couponLimitationNode : couponLimitationNodeList) {</span>
+<span class="fc" id="L52">                String limitationString = couponLimitationNode.toString();</span>
+<span class="fc" id="L53">                BaseCouponLimitation bl = BaseCouponLimitation.getInstance(limitationString).orElse(null);</span>
+<span class="fc" id="L54">                couponLimitationList.add(bl);</span>
+<span class="fc" id="L55">            }</span>
+        }
+<span class="fc" id="L57">        complexCouponLimitation.setCouponLimitationList(couponLimitationList);</span>
+<span class="fc" id="L58">        return complexCouponLimitation;</span>
+    }
+
+    @Override
+    public boolean pass(List&lt;Item&gt; items) {
+<span class="fc bfc" id="L63" title="All 2 branches covered.">        for(BaseCouponLimitation couponLimitation : couponLimitationList) {</span>
+<span class="fc bfc" id="L64" title="All 2 branches covered.">            if (!couponLimitation.pass(items)) {</span>
+<span class="fc" id="L65">                return false;</span>
+            }
+<span class="fc" id="L67">        }</span>
+<span class="fc" id="L68">        return true;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

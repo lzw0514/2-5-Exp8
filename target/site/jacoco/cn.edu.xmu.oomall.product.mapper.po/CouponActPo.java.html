@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CouponActPo.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">product</a> &gt; <a href="index.source.html" class="el_package">cn.edu.xmu.oomall.product.mapper.po</a> &gt; <span class="el_source">CouponActPo.java</span></div><h1>CouponActPo.java</h1><pre class="source lang-java linenums">//School of Informatics Xiamen University, GPL-3.0 license
+
+package cn.edu.xmu.oomall.product.mapper.po;
+
+import cn.edu.xmu.javaee.core.aop.CopyFrom;
+import cn.edu.xmu.oomall.product.dao.bo.Activity;
+import cn.edu.xmu.oomall.product.dao.bo.CouponAct;
+import cn.edu.xmu.oomall.product.model.strategy.BaseCouponDiscount;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.MongoId;
+
+import java.time.LocalDateTime;
+
+@NoArgsConstructor
+@AllArgsConstructor
+@Document(collection = &quot;activity&quot;)
+@CopyFrom({CouponAct.class, Activity.class})
+@ToString
+public class CouponActPo {
+    @MongoId
+    private String objectId;
+    private LocalDateTime couponTime;
+    private Integer quantity;
+    private Integer quantityType;
+    private Integer validTerm;
+    private String strategy;
+
+    public String getObjectId() {
+<span class="fc" id="L32">        return objectId;</span>
+    }
+
+    public void setObjectId(String objectId) {
+<span class="fc" id="L36">        this.objectId = objectId;</span>
+<span class="fc" id="L37">    }</span>
+
+    public LocalDateTime getCouponTime() {
+<span class="fc" id="L40">        return couponTime;</span>
+    }
+
+    public void setCouponTime(LocalDateTime couponTime) {
+<span class="fc" id="L44">        this.couponTime = couponTime;</span>
+<span class="fc" id="L45">    }</span>
+
+    public Integer getQuantity() {
+<span class="fc" id="L48">        return quantity;</span>
+    }
+
+    public void setQuantity(Integer quantity) {
+<span class="fc" id="L52">        this.quantity = quantity;</span>
+<span class="fc" id="L53">    }</span>
+
+    public Integer getQuantityType() {
+<span class="fc" id="L56">        return quantityType;</span>
+    }
+
+    public void setQuantityType(Integer quantityType) {
+<span class="fc" id="L60">        this.quantityType = quantityType;</span>
+<span class="fc" id="L61">    }</span>
+
+    public Integer getValidTerm() {
+<span class="fc" id="L64">        return validTerm;</span>
+    }
+
+    public void setValidTerm(Integer validTerm) {
+<span class="fc" id="L68">        this.validTerm = validTerm;</span>
+<span class="fc" id="L69">    }</span>
+
+
+    public String getStrategy() {
+<span class="fc" id="L73">        return strategy;</span>
+    }
+
+    @CopyFrom.Exclude({CouponAct.class})
+    public void setStrategy(String strategy) {
+<span class="fc" id="L78">        this.strategy = strategy;</span>
+<span class="fc" id="L79">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

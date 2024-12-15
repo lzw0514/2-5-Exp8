@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DeleteTemplateConsumer.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">product</a> &gt; <a href="index.source.html" class="el_package">cn.edu.xmu.oomall.product.service.listener</a> &gt; <span class="el_source">DeleteTemplateConsumer.java</span></div><h1>DeleteTemplateConsumer.java</h1><pre class="source lang-java linenums">package cn.edu.xmu.oomall.product.service.listener;
+
+import cn.edu.xmu.javaee.core.model.dto.UserDto;
+import cn.edu.xmu.javaee.core.util.JacksonUtil;
+import cn.edu.xmu.oomall.product.service.ProductService;
+import lombok.RequiredArgsConstructor;
+import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
+import org.apache.rocketmq.spring.annotation.ConsumeMode;
+import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
+import org.apache.rocketmq.spring.core.RocketMQListener;
+import org.apache.rocketmq.spring.core.RocketMQPushConsumerLifecycleListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.Message;
+import org.springframework.stereotype.Service;
+
+import java.nio.charset.StandardCharsets;
+
+import static cn.edu.xmu.javaee.core.model.Constants.PLATFORM;
+
+/**
+ * 用于删除商品模板
+ * @author wuzhicheng
+ * @create 2022-12-15 17:53
+ */
+@Service
+@RocketMQMessageListener(consumerGroup = &quot;goods_rm_template&quot;, topic = &quot;Del-Template&quot;, selectorExpression = &quot;1&quot;, consumeMode = ConsumeMode.CONCURRENTLY, consumeThreadMax = 10)
+@RequiredArgsConstructor
+public class DeleteTemplateConsumer implements RocketMQListener&lt;Message&gt;, RocketMQPushConsumerLifecycleListener {
+<span class="nc" id="L31">    private static final Logger logger = LoggerFactory.getLogger(DeleteTemplateConsumer.class);</span>
+
+    private final ProductService productService;
+
+    @Override
+    public void onMessage(Message msg) {
+<span class="nc" id="L37">        String body = new String((byte[]) msg.getPayload(), StandardCharsets.UTF_8);</span>
+<span class="nc" id="L38">        Long templateId = JacksonUtil.toObj(body, Long.class);</span>
+<span class="nc" id="L39">        UserDto user = (UserDto) msg.getHeaders().get(&quot;user&quot;);</span>
+<span class="nc bnc" id="L40" title="All 4 branches missed.">        if(templateId==null || user==null){</span>
+<span class="nc" id="L41">            logger.error(&quot;TemplateConsumer: wrong encoding.... msg = {}&quot;, msg);</span>
+        } else{
+<span class="nc" id="L43">            this.productService.removeTemplateId(PLATFORM, templateId, user);</span>
+        }
+<span class="nc" id="L45">    }</span>
+
+    @Override
+    public void prepareStart(DefaultMQPushConsumer defaultMQPushConsumer) {
+<span class="nc" id="L49">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

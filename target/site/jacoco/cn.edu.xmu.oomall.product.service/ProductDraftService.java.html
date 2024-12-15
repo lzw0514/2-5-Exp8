@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ProductDraftService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">product</a> &gt; <a href="index.source.html" class="el_package">cn.edu.xmu.oomall.product.service</a> &gt; <span class="el_source">ProductDraftService.java</span></div><h1>ProductDraftService.java</h1><pre class="source lang-java linenums">//School of Informatics Xiamen University, GPL-3.0 license
+package cn.edu.xmu.oomall.product.service;
+
+import cn.edu.xmu.javaee.core.exception.BusinessException;
+import cn.edu.xmu.javaee.core.model.ReturnNo;
+import cn.edu.xmu.javaee.core.model.ReturnObject;
+import cn.edu.xmu.javaee.core.model.dto.UserDto;
+import cn.edu.xmu.javaee.core.mapper.RedisUtil;
+import cn.edu.xmu.javaee.core.model.returnval.TwoTuple;
+import cn.edu.xmu.oomall.product.dao.CategoryDao;
+import cn.edu.xmu.oomall.product.dao.ProductDao;
+import cn.edu.xmu.oomall.product.dao.ProductDraftDao;
+import cn.edu.xmu.oomall.product.dao.bo.Category;
+import cn.edu.xmu.oomall.product.dao.bo.Product;
+import cn.edu.xmu.oomall.product.dao.bo.ProductDraft;
+import cn.edu.xmu.oomall.product.mapper.openfeign.SearchMapper;
+import cn.edu.xmu.oomall.product.mapper.openfeign.po.ProductEs;
+import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+/**
+ * 草稿产品
+ */
+@Service
+@Transactional(propagation = Propagation.REQUIRED)
+@RequiredArgsConstructor
+public class ProductDraftService {
+
+<span class="fc" id="L35">    private final static Logger logger = LoggerFactory.getLogger(ProductDraftService.class);</span>
+
+    private final ProductDraftDao productDraftDao;
+
+    private final CategoryDao categoryDao;
+
+    private final ProductDao productDao;
+
+    private final RedisUtil redisUtil;
+
+    private final SearchMapper searchMapper;
+
+
+    /**
+     * 商铺管理员申请增加新的Product
+     * @param shopId 商铺id
+     * @param draft 草稿对象
+     * @param user 操作用户
+     * @return
+     */
+    public ProductDraft createDraft(Long shopId, ProductDraft draft, UserDto user) {
+
+<span class="fc" id="L57">        logger.debug(&quot;createDraft: shopId = {}, draft = &quot;, shopId, draft);</span>
+<span class="fc" id="L58">        Category category = this.categoryDao.findById(draft.getCategoryId());</span>
+<span class="fc bfc" id="L59" title="All 2 branches covered.">        if(category.beFirstClassCategory()){</span>
+<span class="fc" id="L60">            throw new BusinessException(ReturnNo.CATEGORY_NOTALLOW, String.format(ReturnNo.CATEGORY_NOTALLOW.getMessage(), category.getId()));</span>
+        }
+
+<span class="fc" id="L63">        ProductDraft newObj = this.productDraftDao.insert(draft, user);</span>
+<span class="fc" id="L64">        return newObj;</span>
+    }
+
+    /**
+     * 管理员或店家物理删除审核中的Products
+     * @author wuzhicheng
+     * @param shopId
+     * @param id
+     * @param user
+     */
+    public void delDraftProduct(Long shopId, Long id, UserDto user) {
+<span class="fc" id="L75">        logger.debug(&quot;delProducts: shopId = {}, productId = {}&quot;, shopId, id);</span>
+<span class="fc" id="L76">        this.productDraftDao.findById(id, shopId);</span>
+<span class="fc" id="L77">        this.productDraftDao.delete(id);</span>
+<span class="fc" id="L78">    }</span>
+
+    /**
+     * 店家或管理员修改审核货品信息
+     * @param shopId 商铺id
+     * @param productDraft 修改对象
+     * @return
+     */
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void modifyById(Long shopId, ProductDraft productDraft, UserDto user) {
+<span class="fc" id="L88">        logger.debug(&quot;modifyById: shopId = {}, productDraft = {}&quot;, shopId, productDraft);</span>
+<span class="fc" id="L89">        this.productDraftDao.findById(productDraft.getId(), shopId);</span>
+<span class="fc" id="L90">        Category category = this.categoryDao.findById(productDraft.getCategoryId());</span>
+<span class="fc bfc" id="L91" title="All 2 branches covered.">        if(category.beFirstClassCategory()){</span>
+<span class="fc" id="L92">            throw new BusinessException(ReturnNo.CATEGORY_NOTALLOW, String.format(ReturnNo.CATEGORY_NOTALLOW.getMessage(), productDraft.getCategoryId()));</span>
+        }
+<span class="fc" id="L94">        this.productDraftDao.save(productDraft, user);</span>
+<span class="fc" id="L95">    }</span>
+
+    /**
+     * 店家查询草稿商品
+     * @param shopId
+     * @param page
+     * @param pageSize
+     * @return
+     */
+    public List&lt;ProductDraft&gt; getAllProductDraft(Long shopId, Integer page, Integer pageSize) {
+<span class="fc" id="L105">        return this.productDraftDao.retrieveProductDraftByShopId(shopId, page, pageSize);</span>
+    }
+
+    /**
+     * 店家查看草稿货品信息详情
+     * @param shopId
+     * @param id
+     * @return
+     */
+    public ProductDraft getProductDraft(Long shopId, Long id) {
+<span class="fc" id="L115">        ProductDraft draft = this.productDraftDao.findById(id, shopId);</span>
+<span class="fc" id="L116">        return draft;</span>
+    }
+
+    /**
+     * 货品发布
+     * @param shopId 商铺id
+     * @param id 审核商品id
+     * @param commissionRatio 分账比例（可以为空）
+     * @param user 操作用户
+     * @return 返回商品的id和名称
+     */
+    public Product publishProduct(Long shopId, Long id, Integer commissionRatio, UserDto user) {
+<span class="nc" id="L128">        logger.debug(&quot;putGoods: draftProductId = {}&quot;, id);</span>
+<span class="nc" id="L129">        ProductDraft productDraft = this.productDraftDao.findById(id, shopId);</span>
+<span class="nc" id="L130">        TwoTuple&lt;Product, String&gt; retVal = productDraft.publish(commissionRatio, user);</span>
+<span class="nc bnc" id="L131" title="All 2 branches missed.">        if (null != retVal.second){</span>
+<span class="nc" id="L132">            redisUtil.del(retVal.second);</span>
+        }
+
+        // 获取发布后的商品
+<span class="nc" id="L136">        Product publishedProduct = retVal.first;</span>
+
+        // 同步商品到 Elasticsearch
+<span class="nc" id="L139">        ProductEs productEs = new ProductEs();</span>
+<span class="nc" id="L140">        productEs.setId(publishedProduct.getId());</span>
+<span class="nc" id="L141">        productEs.setShopId(publishedProduct.getShopId());</span>
+<span class="nc" id="L142">        productEs.setName(publishedProduct.getName());</span>
+<span class="nc" id="L143">        productEs.setBarcode(publishedProduct.getBarcode());</span>
+
+<span class="nc" id="L145">        ReturnObject result = searchMapper.saveOrUpdateProduct(productEs);</span>
+
+
+<span class="nc" id="L148">        return retVal.first;</span>
+    }
+
+    /**
+     * 店家修改需审核的货品信息
+     *
+     * @param shopId 商铺id
+     * @param id 商品id
+     * @param user 操作用户
+     * @param draft 修改的属性
+     */
+    public ProductDraft updateProduct(Long shopId, Long id, UserDto user, ProductDraft draft) {
+<span class="nc" id="L160">        logger.debug(&quot;updateProduct: productId = {}, draft = {}&quot;, id, draft);</span>
+        //查询Product,防止修改其他商铺的商品或商品不存在
+<span class="nc" id="L162">        this.productDao.findNoOnsaleById(shopId, id);</span>
+<span class="nc" id="L163">        draft.setProductId(id);</span>
+<span class="nc" id="L164">        return this.createDraft(shopId, draft, user);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

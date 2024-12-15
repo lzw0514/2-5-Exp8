@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CouponActVo.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">product</a> &gt; <a href="index.source.html" class="el_package">cn.edu.xmu.oomall.product.controller.vo</a> &gt; <span class="el_source">CouponActVo.java</span></div><h1>CouponActVo.java</h1><pre class="source lang-java linenums">//School of Informatics Xiamen University, GPL-3.0 license
+package cn.edu.xmu.oomall.product.controller.vo;
+
+import cn.edu.xmu.javaee.core.aop.CopyFrom;
+import cn.edu.xmu.javaee.core.model.vo.IdNameTypeVo;
+import cn.edu.xmu.javaee.core.util.CloneFactory;
+import cn.edu.xmu.oomall.product.dao.bo.CouponAct;
+import cn.edu.xmu.oomall.product.model.strategy.BaseCouponDiscount;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@NoArgsConstructor
+@CopyFrom({CouponAct.class})
+public class CouponActVo {
+
+    private Long id;
+
+    private String name;
+
+    private Integer quantity;
+
+    private LocalDateTime couponTime;
+
+    private Integer quantityType;
+
+    private IdNameTypeVo shop;
+
+    private Integer validTerm;
+
+    private BaseCouponDiscount strategy;
+
+    private IdNameTypeVo creator;
+
+    private IdNameTypeVo modifier;
+
+    private LocalDateTime gmtCreate;
+
+    private LocalDateTime gmtModified;
+
+    public CouponActVo(CouponAct act){
+<span class="nc" id="L44">        this();</span>
+<span class="nc" id="L45">        CloneFactory.copy(this, act);</span>
+<span class="nc" id="L46">        this.setShop1(IdNameTypeVo.builder().id(act.getShopId()).name(act.getShop().getName()).build());</span>
+<span class="nc" id="L47">        this.setCreator(IdNameTypeVo.builder().id(act.getCreatorId()).name(act.getCreatorName()).build());</span>
+<span class="nc" id="L48">        this.setModifier(IdNameTypeVo.builder().id(act.getModifierId()).name(act.getModifierName()).build());</span>
+<span class="nc" id="L49">    }</span>
+
+    public Long getId() {
+<span class="fc" id="L52">        return id;</span>
+    }
+
+    public void setId(Long id) {
+<span class="fc" id="L56">        this.id = id;</span>
+<span class="fc" id="L57">    }</span>
+
+    public String getName() {
+<span class="fc" id="L60">        return name;</span>
+    }
+
+    public void setName(String name) {
+<span class="fc" id="L64">        this.name = name;</span>
+<span class="fc" id="L65">    }</span>
+
+    public Integer getQuantity() {
+<span class="fc" id="L68">        return quantity;</span>
+    }
+
+    public void setQuantity(Integer quantity) {
+<span class="fc" id="L72">        this.quantity = quantity;</span>
+<span class="fc" id="L73">    }</span>
+
+    public LocalDateTime getCouponTime() {
+<span class="fc" id="L76">        return couponTime;</span>
+    }
+
+    public void setCouponTime(LocalDateTime couponTime) {
+<span class="fc" id="L80">        this.couponTime = couponTime;</span>
+<span class="fc" id="L81">    }</span>
+
+    public Integer getQuantityType() {
+<span class="fc" id="L84">        return quantityType;</span>
+    }
+
+    public void setQuantityType(Integer quantityType) {
+<span class="fc" id="L88">        this.quantityType = quantityType;</span>
+<span class="fc" id="L89">    }</span>
+
+    public IdNameTypeVo getShop() {
+<span class="fc" id="L92">        return shop;</span>
+    }
+
+    public void setShop1(IdNameTypeVo shop) {
+<span class="nc" id="L96">        this.shop = shop;</span>
+<span class="nc" id="L97">    }</span>
+
+    public Integer getValidTerm() {
+<span class="fc" id="L100">        return validTerm;</span>
+    }
+
+    public void setValidTerm(Integer validTerm) {
+<span class="fc" id="L104">        this.validTerm = validTerm;</span>
+<span class="fc" id="L105">    }</span>
+
+    public BaseCouponDiscount getStrategy() {
+<span class="fc" id="L108">        return strategy;</span>
+    }
+
+    public void setStrategy(BaseCouponDiscount strategy) {
+<span class="fc" id="L112">        this.strategy = strategy;</span>
+<span class="fc" id="L113">    }</span>
+
+    public IdNameTypeVo getCreator() {
+<span class="fc" id="L116">        return creator;</span>
+    }
+
+    public void setCreator(IdNameTypeVo creator) {
+<span class="nc" id="L120">        this.creator = creator;</span>
+<span class="nc" id="L121">    }</span>
+
+    public IdNameTypeVo getModifier() {
+<span class="fc" id="L124">        return modifier;</span>
+    }
+
+    public void setModifier(IdNameTypeVo modifier) {
+<span class="nc" id="L128">        this.modifier = modifier;</span>
+<span class="nc" id="L129">    }</span>
+
+    public LocalDateTime getGmtCreate() {
+<span class="fc" id="L132">        return gmtCreate;</span>
+    }
+
+    public void setGmtCreate(LocalDateTime gmtCreate) {
+<span class="fc" id="L136">        this.gmtCreate = gmtCreate;</span>
+<span class="fc" id="L137">    }</span>
+
+    public LocalDateTime getGmtModified() {
+<span class="fc" id="L140">        return gmtModified;</span>
+    }
+
+    public void setGmtModified(LocalDateTime gmtModified) {
+<span class="fc" id="L144">        this.gmtModified = gmtModified;</span>
+<span class="fc" id="L145">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BaseCouponDiscount.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">product</a> &gt; <a href="index.source.html" class="el_package">cn.edu.xmu.oomall.product.model.strategy</a> &gt; <span class="el_source">BaseCouponDiscount.java</span></div><h1>BaseCouponDiscount.java</h1><pre class="source lang-java linenums">//School of Informatics Xiamen University, GPL-3.0 license
+package cn.edu.xmu.oomall.product.model.strategy;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.lang.reflect.InvocationTargetException;
+import java.util.List;
+import java.util.Optional;
+
+
+/**
+ *  @author xincong yao
+
+ */
+/**
+ * @author yuhao shi
+ * @date 2023-12-09
+ * dgn2-010-syh
+ */
+@NoArgsConstructor
+@Data
+public abstract class BaseCouponDiscount{
+
+<span class="fc" id="L30">	private static Logger logger = LoggerFactory.getLogger(BaseCouponDiscount.class);</span>
+
+	protected Long value;
+
+	protected BaseCouponLimitation couponLimitation;
+
+	protected String className;
+
+<span class="nc" id="L38">	public BaseCouponDiscount(Long value, BaseCouponLimitation limitation) {</span>
+<span class="nc" id="L39">		this.value = value;</span>
+<span class="nc" id="L40">		this.couponLimitation = limitation;</span>
+<span class="nc" id="L41">		this.className = this.getClass().getName();</span>
+<span class="nc" id="L42">	}</span>
+
+
+	public List&lt;Item&gt; compute(List&lt;Item&gt; items) {
+<span class="fc bfc" id="L46" title="All 2 branches covered.">		if (!this.couponLimitation.pass(items)) {</span>
+<span class="fc bfc" id="L47" title="All 2 branches covered.">			for (Item oi : items) {</span>
+<span class="fc" id="L48">				oi.setCouponActivityId(null);</span>
+<span class="fc" id="L49">			}</span>
+<span class="fc" id="L50">			return items;</span>
+		}
+<span class="fc" id="L52">		calcAndSetDiscount(items);</span>
+<span class="fc" id="L53">		return items;</span>
+	}
+
+	public abstract void calcAndSetDiscount(List&lt;Item&gt; items);
+
+	public static Optional&lt;BaseCouponDiscount&gt; getInstance(String jsonString){
+<span class="fc" id="L59">		ObjectMapper mapper = new ObjectMapper();</span>
+<span class="fc" id="L60">		BaseCouponDiscount bc = null;</span>
+<span class="fc" id="L61">		JsonNode root = null;</span>
+		try {
+<span class="fc" id="L63">			root = mapper.readTree(jsonString);</span>
+
+<span class="fc" id="L65">			String className = root.get(&quot;className&quot;).asText();</span>
+<span class="fc" id="L66">			bc = (BaseCouponDiscount) Class.forName(className).getConstructor().newInstance();</span>
+
+<span class="fc" id="L68">			String limitation = root.get(&quot;couponLimitation&quot;).toString();</span>
+<span class="fc" id="L69">			BaseCouponLimitation bl = BaseCouponLimitation.getInstance(limitation).orElse(null);</span>
+<span class="fc" id="L70">			Long value = Long.valueOf(root.get(&quot;couponLimitation&quot;).get(&quot;value&quot;).toString());</span>
+<span class="fc" id="L71">			bl.setValue(value);</span>
+
+<span class="fc" id="L73">			bc.setCouponLimitation(bl);</span>
+<span class="fc" id="L74">			bc.setValue(root.get(&quot;value&quot;).asLong());</span>
+<span class="fc" id="L75">			bc.setClassName(className);</span>
+<span class="nc" id="L76">		} catch (JsonProcessingException e) {</span>
+<span class="nc" id="L77">			logger.error(&quot;getInstance: JsonProcessingException strategy = {}&quot;, jsonString);</span>
+<span class="nc" id="L78">		} catch (ClassNotFoundException e) {</span>
+<span class="nc" id="L79">			logger.error(&quot;getInstance: ClassNotFoundException strategy = {}&quot;, jsonString);</span>
+<span class="nc" id="L80">		} catch (InvocationTargetException e) {</span>
+<span class="nc" id="L81">			logger.error(&quot;getInstance: InvocationTargetException strategy = {}&quot;, jsonString);</span>
+<span class="nc" id="L82">		} catch (InstantiationException e) {</span>
+<span class="nc" id="L83">			logger.error(&quot;getInstance: InstantiationException strategy = {}&quot;, jsonString);</span>
+<span class="nc" id="L84">		} catch (IllegalAccessException e) {</span>
+<span class="nc" id="L85">			logger.error(&quot;getInstance: IllegalAccessException strategy = {}&quot;, jsonString);</span>
+<span class="nc" id="L86">		} catch (NoSuchMethodException e) {</span>
+<span class="nc" id="L87">			logger.error(&quot;getInstance: NoSuchMethodException strategy = {}&quot;, jsonString);</span>
+<span class="pc" id="L88">		}</span>
+<span class="fc" id="L89">		return Optional.ofNullable(bc);</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

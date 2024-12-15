@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CouponActDto.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">product</a> &gt; <a href="index.source.html" class="el_package">cn.edu.xmu.oomall.product.controller.dto</a> &gt; <span class="el_source">CouponActDto.java</span></div><h1>CouponActDto.java</h1><pre class="source lang-java linenums">//School of Informatics Xiamen University, GPL-3.0 license
+package cn.edu.xmu.oomall.product.controller.dto;
+
+import cn.edu.xmu.javaee.core.validation.NewGroup;
+import cn.edu.xmu.oomall.product.model.strategy.BaseCouponDiscount;
+import com.fasterxml.jackson.databind.JsonNode;
+import jakarta.validation.groups.Default;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
+import org.springframework.format.annotation.DateTimeFormat;
+
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import java.time.LocalDateTime;
+
+/**
+ * 优惠活动vo
+ */
+@NoArgsConstructor
+@ToString
+@Data
+public class CouponActDto {
+
+    @NotBlank(message = &quot;优惠活动名称不能为空&quot;, groups = {NewGroup.class})
+    private String name;
+
+    @Min(value = 0, message = &quot;0-不用优惠券&quot;, groups = {Default.class, NewGroup.class})
+    @NotNull(groups = {NewGroup.class})
+    private Integer quantity;
+
+    @Min(value = 0, message = &quot;0-每人数量&quot;, groups = {Default.class, NewGroup.class})
+    @Max(value = 1, message = &quot;1-总数控制&quot;, groups = {Default.class, NewGroup.class})
+    @NotNull(groups = {NewGroup.class})
+    private Integer quantityType;
+
+    @Min(value = 0, message = &quot;0-与活动同&quot;, groups = {Default.class, NewGroup.class})
+    @NotNull(groups = {NewGroup.class})
+    private Integer validTerm;
+
+    @DateTimeFormat(iso=DateTimeFormat.ISO.DATE_TIME)
+    @NotNull(groups = {NewGroup.class})
+    private LocalDateTime couponTime;
+
+    @NotNull(message = &quot;优惠券规则不能为空&quot;, groups = {NewGroup.class})
+    private BaseCouponDiscount strategy;
+
+    public String getName() {
+<span class="fc" id="L51">        return name;</span>
+    }
+
+    public void setName(String name) {
+<span class="fc" id="L55">        this.name = name;</span>
+<span class="fc" id="L56">    }</span>
+
+    public Integer getQuantity() {
+<span class="fc" id="L59">        return quantity;</span>
+    }
+
+    public void setQuantity(Integer quantity) {
+<span class="fc" id="L63">        this.quantity = quantity;</span>
+<span class="fc" id="L64">    }</span>
+
+    public Integer getQuantityType() {
+<span class="fc" id="L67">        return quantityType;</span>
+    }
+
+    public void setQuantityType(Integer quantityType) {
+<span class="fc" id="L71">        this.quantityType = quantityType;</span>
+<span class="fc" id="L72">    }</span>
+
+    public Integer getValidTerm() {
+<span class="fc" id="L75">        return validTerm;</span>
+    }
+
+    public void setValidTerm(Integer validTerm) {
+<span class="fc" id="L79">        this.validTerm = validTerm;</span>
+<span class="fc" id="L80">    }</span>
+
+    public LocalDateTime getCouponTime() {
+<span class="fc" id="L83">        return couponTime;</span>
+    }
+
+    public void setCouponTime(LocalDateTime couponTime) {
+<span class="fc" id="L87">        this.couponTime = couponTime;</span>
+<span class="fc" id="L88">    }</span>
+
+    public BaseCouponDiscount getStrategy() {
+<span class="fc" id="L91">        return strategy;</span>
+    }
+
+    public void setStrategy(JsonNode strategy) {
+<span class="fc" id="L95">        this.strategy = BaseCouponDiscount.getInstance(strategy.toString()).orElse(null);</span>
+<span class="fc" id="L96">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

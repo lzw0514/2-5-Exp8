@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GrouponController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">product</a> &gt; <a href="index.source.html" class="el_package">cn.edu.xmu.oomall.product.controller</a> &gt; <span class="el_source">GrouponController.java</span></div><h1>GrouponController.java</h1><pre class="source lang-java linenums">//School of Informatics Xiamen University, GPL-3.0 license
+package cn.edu.xmu.oomall.product.controller;
+
+import cn.edu.xmu.javaee.core.model.ReturnObject;
+import cn.edu.xmu.javaee.core.model.vo.PageVo;
+import cn.edu.xmu.javaee.core.util.CloneFactory;
+import cn.edu.xmu.oomall.product.controller.vo.GrouponActVo;
+import cn.edu.xmu.oomall.product.controller.vo.SimpleGrouponActVo;
+import cn.edu.xmu.oomall.product.controller.vo.SimpleProductVo;
+import cn.edu.xmu.oomall.product.dao.bo.GrouponAct;
+import cn.edu.xmu.oomall.product.dao.bo.OnSale;
+import cn.edu.xmu.oomall.product.dao.bo.Product;
+import cn.edu.xmu.oomall.product.service.GrouponActService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static cn.edu.xmu.javaee.core.model.Constants.PLATFORM;
+
+
+/**
+ * 团购控制器
+ * @author prophesier
+ */
+@RestController /*Restful的Controller对象*/
+@RequestMapping(produces = &quot;application/json;charset=UTF-8&quot;)
+@RequiredArgsConstructor
+<span class="fc" id="L37">@Slf4j</span>
+public class GrouponController {
+
+    private final GrouponActService grouponActService;
+
+    @GetMapping(&quot;/groupons&quot;)
+    @Transactional(propagation = Propagation.REQUIRED)
+    public ReturnObject retrieveGrouponAct(@RequestParam(required = false) Long shopId,
+                                           @RequestParam(required = false) Long productId,
+                                           @RequestParam(required = false) LocalDateTime beginTime,
+                                           @RequestParam(required = false) LocalDateTime endTime,
+                                           @RequestParam(required = false, defaultValue = &quot;1&quot;) Integer page,
+                                           @RequestParam(required = false, defaultValue = &quot;10&quot;) Integer pageSize) {
+
+<span class="fc" id="L51">        List&lt;GrouponAct&gt; actList = this.grouponActService.retrieveValidByShopIdAndProductId(shopId,productId,beginTime, endTime, page,pageSize);</span>
+<span class="fc" id="L52">        List&lt;SimpleGrouponActVo&gt; grouponActList = actList.stream().map(act -&gt; {</span>
+            SimpleGrouponActVo dto;
+<span class="fc" id="L54">            List&lt;OnSale&gt; onsaleList = act.getOnsaleList();</span>
+<span class="pc bpc" id="L55" title="1 of 2 branches missed.">            if (onsaleList.size() == 0){</span>
+<span class="nc" id="L56">                log.error(&quot;retrieveGrouponAct: GrouponAct (id = {}) has no onsale&quot;);</span>
+<span class="nc" id="L57">                dto = new SimpleGrouponActVo();</span>
+            }else {
+                //所有团购的销售时间都相同
+<span class="fc" id="L60">                dto = CloneFactory.copy(new SimpleGrouponActVo(), onsaleList.get(0));</span>
+            }
+<span class="fc" id="L62">            CloneFactory.copy(dto, act);</span>
+<span class="fc" id="L63">            return dto;</span>
+<span class="fc" id="L64">        }).collect(Collectors.toList());</span>
+<span class="fc" id="L65">        return new ReturnObject(new PageVo&lt;&gt;(grouponActList, page, pageSize));</span>
+    }
+
+
+    @GetMapping(&quot;/groupons/{id}&quot;)
+    @Transactional(propagation = Propagation.REQUIRED)
+    public ReturnObject findGrouponActById(@PathVariable Long id){
+<span class="fc" id="L72">        GrouponAct act = this.grouponActService.findById(id, PLATFORM);</span>
+<span class="fc" id="L73">        return new ReturnObject(CloneFactory.copy(new GrouponActVo(),act));</span>
+    }
+
+    @GetMapping(&quot;/groupons/{id}/products&quot;)
+    @Transactional(propagation = Propagation.REQUIRED)
+    public ReturnObject getGrouponActProduct(@PathVariable Long id,
+                                             @RequestParam(required = false, defaultValue = &quot;1&quot;) Integer page,
+                                             @RequestParam(required = false, defaultValue = &quot;10&quot;) Integer pageSize) {
+
+<span class="fc" id="L82">        List&lt;Product&gt; products = this.grouponActService.retrieveProduct(id);</span>
+<span class="fc" id="L83">        List&lt;SimpleProductVo&gt; dtos = products.stream().map(obj -&gt; new SimpleProductVo(obj)).collect(Collectors.toList());</span>
+<span class="fc" id="L84">        return new ReturnObject(new PageVo&lt;&gt;(dtos.subList((page-1) * pageSize, Math.min(dtos.size(), page * pageSize)), page, pageSize));</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

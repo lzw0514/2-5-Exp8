@@ -1,0 +1,417 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ActivityDao.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">product</a> &gt; <a href="index.source.html" class="el_package">cn.edu.xmu.oomall.product.dao.activity</a> &gt; <span class="el_source">ActivityDao.java</span></div><h1>ActivityDao.java</h1><pre class="source lang-java linenums">//School of Informatics Xiamen University, GPL-3.0 license
+package cn.edu.xmu.oomall.product.dao.activity;
+
+import cn.edu.xmu.javaee.core.exception.BusinessException;
+import cn.edu.xmu.javaee.core.model.ReturnNo;
+import cn.edu.xmu.javaee.core.model.dto.UserDto;
+import cn.edu.xmu.javaee.core.util.CloneFactory;
+import cn.edu.xmu.javaee.core.mapper.RedisUtil;
+import cn.edu.xmu.oomall.product.dao.onsale.OnSaleDao;
+import cn.edu.xmu.oomall.product.dao.bo.*;
+import cn.edu.xmu.oomall.product.dao.openfeign.ShopDao;
+import cn.edu.xmu.oomall.product.mapper.jpa.ActivityOnsalePoMapper;
+import cn.edu.xmu.oomall.product.mapper.jpa.ActivityPoMapper;
+import cn.edu.xmu.oomall.product.mapper.po.ActivityOnsalePo;
+import cn.edu.xmu.oomall.product.mapper.po.ActivityPo;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Repository;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import static cn.edu.xmu.javaee.core.model.Constants.*;
+
+<span class="fc" id="L36">@Repository</span>
+public class ActivityDao {
+<span class="fc" id="L38">    private Logger logger = LoggerFactory.getLogger(ActivityDao.class);</span>
+
+    private final static String KEY = &quot;A%d&quot;;
+<span class="fc" id="L41">    private final String ACTIVITY_LIST_KEY = &quot;ACTIVITYLIST%d&quot;;</span>
+    @Value(&quot;${oomall.activity.timeout}&quot;)
+    private int timeout;
+
+    private RedisUtil redisUtil;
+
+    private ApplicationContext context;
+
+    private ActivityOnsalePoMapper activityOnsalePoMapper;
+
+    private ActivityPoMapper activityPoMapper;
+
+    private ShopDao shopDao;
+
+    private OnSaleDao onsaleDao;
+
+    @Autowired
+    public ActivityDao(RedisUtil redisUtil, ApplicationContext context, ActivityOnsalePoMapper activityOnsalePoMapper,
+<span class="fc" id="L59">                       ActivityPoMapper activityPoMapper, ShopDao shopDao, OnSaleDao onsaleDao) {</span>
+<span class="fc" id="L60">        this.redisUtil = redisUtil;</span>
+<span class="fc" id="L61">        this.context = context;</span>
+<span class="fc" id="L62">        this.activityOnsalePoMapper = activityOnsalePoMapper;</span>
+<span class="fc" id="L63">        this.activityPoMapper = activityPoMapper;</span>
+<span class="fc" id="L64">        this.shopDao = shopDao;</span>
+<span class="fc" id="L65">        this.onsaleDao = onsaleDao;</span>
+<span class="fc" id="L66">    }</span>
+
+    /**
+     * 由po对象获得bo对象
+     * 主要是设置bo对象中关联的dao对象，并把bo对象存在redis中
+     *
+     * @param po       po对象
+     * @param redisKey redis的key，如果是null就不存redis
+     * @return bo对象
+     */
+    private Activity build(ActivityPo po, Optional&lt;String&gt; redisKey) {
+<span class="fc" id="L77">        logger.debug(&quot;build: po = {}&quot;, po);</span>
+<span class="fc" id="L78">        ActivityInf inf = this.findActivityDao(po);</span>
+<span class="fc" id="L79">        Activity bo = inf.getActivity(po);</span>
+<span class="fc" id="L80">        redisKey.ifPresent(key -&gt; redisUtil.set(key, bo, this.timeout));</span>
+<span class="fc" id="L81">        this.build(bo);</span>
+<span class="fc" id="L82">        logger.debug(&quot;build: bo = {}&quot;, bo);</span>
+<span class="fc" id="L83">        return bo;</span>
+    }
+
+    /**
+     * 设置bo对象关联的dao对象
+     *
+     * @param bo bo对象
+     */
+    private Activity build(Activity bo) {
+<span class="fc" id="L92">        bo.setShopDao(this.shopDao);</span>
+<span class="fc" id="L93">        bo.setOnsaleDao(this.onsaleDao);</span>
+<span class="fc" id="L94">        return bo;</span>
+    }
+
+    /**
+     * 返回Bean对象
+     *
+     * @param po
+     * @return
+     * @author Ming Qiu
+     * &lt;p&gt;
+     * date: 2022-11-22 16:11
+     */
+    private ActivityInf findActivityDao(ActivityPo po) {
+<span class="fc" id="L107">        return (ActivityInf) context.getBean(po.getActClass());</span>
+    }
+
+    private ActivityInf findActivityDao(Activity bo) {
+<span class="fc" id="L111">        return (ActivityInf) context.getBean(bo.getActClass());</span>
+    }
+
+    /**
+     * 获得销售对象的活动
+     *
+     * @param onsaleId
+     * @return
+     * @author Ming Qiu
+     * &lt;p&gt;
+     * date: 2022-11-27 16:54
+     */
+    public List&lt;Activity&gt; retrieveByOnsaleId(Long onsaleId) {
+<span class="pc bpc" id="L124" title="1 of 2 branches missed.">        assert (null != onsaleId) : new IllegalArgumentException();</span>
+
+<span class="fc" id="L126">        Pageable pageable = PageRequest.of(0, MAX_RETURN, Sort.by(&quot;gmtCreate&quot;).descending());</span>
+
+<span class="fc" id="L128">        String key = String.format(ACTIVITY_LIST_KEY, onsaleId);</span>
+<span class="fc" id="L129">        List&lt;Long&gt; actPosId = (ArrayList&lt;Long&gt;) redisUtil.get(key);</span>
+<span class="pc bpc" id="L130" title="1 of 2 branches missed.">        if (actPosId == null) {</span>
+<span class="fc" id="L131">            List&lt;ActivityPo&gt; actPos = this.activityPoMapper.findByOnsaleIdEquals(onsaleId, pageable);</span>
+<span class="fc" id="L132">            redisUtil.set(key, new ArrayList&lt;&gt;(actPos.stream().map(ActivityPo::getId).toList()), timeout);</span>
+<span class="fc" id="L133">            return actPos.stream().map(po -&gt; {</span>
+<span class="fc" id="L134">                logger.debug(&quot;retrieveByOnsaleId: po = {}&quot;, po);</span>
+<span class="fc" id="L135">                String onSaleKey = String.format(KEY, po.getId());</span>
+<span class="fc" id="L136">                Activity bo = this.build(po, Optional.ofNullable(onSaleKey));</span>
+<span class="fc" id="L137">                return bo;</span>
+<span class="fc" id="L138">            }).collect(Collectors.toList());</span>
+        } else {
+<span class="nc" id="L140">            List&lt;Activity&gt; g = actPosId.stream().map(i -&gt; {</span>
+<span class="nc" id="L141">                String activityKey = String.format(KEY, i);</span>
+<span class="nc" id="L142">                Activity activity = (Activity) redisUtil.get(activityKey);</span>
+
+<span class="nc bnc" id="L144" title="All 2 branches missed.">                if (activity != null) {</span>
+<span class="nc" id="L145">                    return activity;</span>
+                } else {
+<span class="nc" id="L147">                    Optional&lt;ActivityPo&gt; activityPo = this.activityPoMapper.findById(i);</span>
+<span class="nc bnc" id="L148" title="All 2 branches missed.">                    if (activityPo.isEmpty()) {</span>
+<span class="nc" id="L149">                        return null;</span>
+                    }
+<span class="nc" id="L151">                    logger.debug(&quot;retrieveByOnsaleId: po = {}&quot;, activityPo);</span>
+<span class="nc" id="L152">                    return this.build(activityPo.get(), Optional.ofNullable(activityKey));</span>
+                }
+<span class="nc" id="L154">            }).toList();</span>
+<span class="nc" id="L155">            g = g.stream().filter(Objects::nonNull).toList();</span>
+<span class="nc" id="L156">            redisUtil.set(key, new ArrayList&lt;&gt;(g.stream().map(Activity::getId).toList()), timeout);</span>
+<span class="nc" id="L157">            return g;</span>
+        }
+
+    }
+
+    /**
+     * 根据id获得对象
+     *
+     * @param id       活动id
+     * @param shopId   商铺id
+     * @param actClass 类型名称
+     * @return 不同类型的活动对象
+     * @author Ming Qiu
+     * date: 2022-11-27 18:29
+     */
+    public &lt;T extends Activity&gt; T findById(Long id, Long shopId, String actClass) throws RuntimeException {
+<span class="pc bpc" id="L173" title="2 of 4 branches missed.">        assert (null != id &amp;&amp; null != shopId) : new IllegalArgumentException();</span>
+<span class="fc" id="L174">        String key = String.format(KEY, id);</span>
+<span class="fc" id="L175">        Activity act = (Activity) redisUtil.get(key);</span>
+<span class="fc bfc" id="L176" title="All 2 branches covered.">        if (act != null) {</span>
+<span class="fc bfc" id="L177" title="All 4 branches covered.">            if (!shopId.equals(act.getShopId()) &amp;&amp; !PLATFORM.equals(shopId)) {</span>
+<span class="fc" id="L178">                throw new BusinessException(ReturnNo.RESOURCE_ID_OUTSCOPE,</span>
+<span class="fc" id="L179">                        String.format(ReturnNo.RESOURCE_ID_OUTSCOPE.getMessage(), &quot;活动&quot;, id, shopId));</span>
+            }
+<span class="fc bfc" id="L181" title="All 2 branches covered.">            if (act.getActClass().equals(actClass)) {</span>
+<span class="fc" id="L182">                build(act);</span>
+<span class="fc" id="L183">                return (T) act;</span>
+            } else {
+<span class="fc" id="L185">                throw new BusinessException(ReturnNo.RESOURCE_ID_NOTEXIST,</span>
+<span class="fc" id="L186">                        String.format(ReturnNo.RESOURCE_ID_NOTEXIST.getMessage(), &quot;活动&quot;, id));</span>
+            }
+        }
+
+<span class="fc" id="L190">        Optional&lt;ActivityPo&gt; ret = this.activityPoMapper.findById(id);</span>
+<span class="fc bfc" id="L191" title="All 2 branches covered.">        if (ret.isPresent()) {</span>
+<span class="fc" id="L192">            ActivityPo po = ret.get();</span>
+<span class="fc bfc" id="L193" title="All 4 branches covered.">            if (!shopId.equals(po.getShopId()) &amp;&amp; !PLATFORM.equals(shopId)) {</span>
+<span class="fc" id="L194">                throw new BusinessException(ReturnNo.RESOURCE_ID_OUTSCOPE,</span>
+<span class="fc" id="L195">                        String.format(ReturnNo.RESOURCE_ID_OUTSCOPE.getMessage(), &quot;活动&quot;, id, shopId));</span>
+            }
+<span class="fc bfc" id="L197" title="All 2 branches covered.">            if (po.getActClass().equals(actClass)) {</span>
+<span class="fc" id="L198">                return (T) this.build(po, Optional.ofNullable(key));</span>
+            } else {
+<span class="fc" id="L200">                throw new BusinessException(ReturnNo.RESOURCE_ID_NOTEXIST,</span>
+<span class="fc" id="L201">                        String.format(ReturnNo.RESOURCE_ID_NOTEXIST.getMessage(), &quot;活动&quot;, id));</span>
+            }
+        } else {
+<span class="fc" id="L204">            throw new BusinessException(ReturnNo.RESOURCE_ID_NOTEXIST,</span>
+<span class="fc" id="L205">                    String.format(ReturnNo.RESOURCE_ID_NOTEXIST.getMessage(), &quot;活动&quot;, id));</span>
+        }
+    }
+
+    /**
+     * 更新对象：分别对 Activity 和 CouponAct 进行保存操作
+     *
+     * @param bo   更新的对象属性（其中not null的属性）
+     * @param user
+     * @param &lt;T&gt;  对象类型
+     * @return 需删除的redis key
+     * @throws RuntimeException
+     */
+    public &lt;T extends Activity&gt; String save(T bo, UserDto user) throws RuntimeException {
+<span class="pc bpc" id="L219" title="1 of 2 branches missed.">        if (null == user) {</span>
+<span class="nc" id="L220">            throw new IllegalArgumentException(&quot;user can not be null&quot;);</span>
+        }
+
+<span class="fc" id="L223">        String key = String.format(KEY, bo.getId());</span>
+<span class="fc" id="L224">        bo.setModifier(user);</span>
+<span class="fc" id="L225">        bo.setGmtModified(LocalDateTime.now());</span>
+<span class="fc" id="L226">        ActivityPo po = CloneFactory.copy(new ActivityPo(), bo);</span>
+<span class="fc" id="L227">        ActivityPo savedPo = this.activityPoMapper.save(po);</span>
+<span class="pc bpc" id="L228" title="1 of 2 branches missed.">        if (savedPo.getId().equals(IDNOTEXIST)) {</span>
+<span class="nc" id="L229">            throw new BusinessException(ReturnNo.RESOURCE_ID_NOTEXIST,</span>
+<span class="nc" id="L230">                    String.format(ReturnNo.RESOURCE_ID_NOTEXIST.getMessage(), &quot;活动&quot;, bo.getId()));</span>
+        }
+<span class="fc" id="L232">        logger.debug(&quot;save:saved po = {}&quot;, savedPo);</span>
+<span class="fc bfc" id="L233" title="All 2 branches covered.">        if (!Objects.isNull(bo.getObjectId())) {</span>
+<span class="fc" id="L234">            ActivityInf inf = this.findActivityDao(bo);</span>
+<span class="fc" id="L235">            inf.save(bo);</span>
+        }
+<span class="fc" id="L237">        logger.debug(&quot;save:saved bo = {}&quot;, bo);</span>
+<span class="fc" id="L238">        return key;</span>
+    }
+
+    /**
+     * 增加活动
+     *
+     * @param bo   活动对象
+     * @param user 用户
+     * @return 新增的活动对象
+     * @throws RuntimeException
+     */
+    public &lt;T extends Activity&gt; T insert(T bo, UserDto user) throws RuntimeException {
+<span class="pc bpc" id="L250" title="1 of 2 branches missed.">        if (null == user) {</span>
+<span class="nc" id="L251">            throw new IllegalArgumentException(&quot;user can not be null&quot;);</span>
+        }
+<span class="fc" id="L253">        bo.setCreator(user);</span>
+<span class="fc" id="L254">        bo.setGmtCreate(LocalDateTime.now());</span>
+<span class="fc" id="L255">        ActivityPo po = CloneFactory.copy(new ActivityPo(), bo);</span>
+<span class="fc" id="L256">        po.setStatus(CouponAct.NEW); // 对于新增的活动，将status设为NEW</span>
+<span class="fc" id="L257">        ActivityInf inf = this.findActivityDao(po);</span>
+<span class="fc" id="L258">        String objectId = inf.insert(bo);</span>
+<span class="fc" id="L259">        logger.debug(&quot;insert: objectId = {}&quot;, objectId);</span>
+<span class="fc" id="L260">        po.setObjectId(objectId);</span>
+<span class="fc" id="L261">        po.setId(null);</span>
+<span class="fc" id="L262">        ActivityPo newPo = this.activityPoMapper.save(po);</span>
+<span class="fc" id="L263">        logger.debug(&quot;insert: newPo = {}&quot;, newPo);</span>
+<span class="fc" id="L264">        bo.setId(newPo.getId());</span>
+<span class="fc" id="L265">        return bo;</span>
+    }
+
+    /**
+     * 增加活动与销售的关系
+     *
+     * @param actId    活动id
+     * @param onsaleId 销售id
+     * @param user     用户
+     * @return 需要删除的key
+     * @throws RuntimeException
+     */
+    public String insertActivityOnsale(Long actId, Long onsaleId, UserDto user) throws RuntimeException {
+<span class="pc bpc" id="L278" title="1 of 2 branches missed.">        if (null == user) {</span>
+<span class="nc" id="L279">            throw new IllegalArgumentException(&quot;user can not be null when create activity-onsale. &quot;);</span>
+        }
+<span class="fc" id="L281">        ActivityOnsalePo activityOnsalePo = ActivityOnsalePo.builder().onsaleId(onsaleId).actId(actId)</span>
+<span class="fc" id="L282">                .creatorId(user.getId()).creatorName(user.getName()).gmtCreate(LocalDateTime.now()).build();</span>
+<span class="fc" id="L283">        logger.debug(&quot;insertActivityOnsale: activityOnsalePo = {}&quot;, activityOnsalePo);</span>
+<span class="fc" id="L284">        this.activityOnsalePoMapper.save(activityOnsalePo);</span>
+<span class="fc" id="L285">        return String.format(ACTIVITY_LIST_KEY, onsaleId);</span>
+    }
+
+    /**
+     * 去除活动与销售的关系
+     *
+     * @param actId    活动id
+     * @param onsaleId 销售id
+     * @param deleter  用户
+     * @return 需删除的redis key
+     * @throws RuntimeException
+     * @author Fan ninghan
+     */
+    public String deleteActivityOnsale(Long actId, Long onsaleId, UserDto deleter) throws RuntimeException {
+<span class="pc bpc" id="L299" title="1 of 2 branches missed.">        if (null == deleter) {</span>
+<span class="nc" id="L300">            throw new IllegalArgumentException(&quot;user can not be null when delete activity-onsale. &quot;);</span>
+        }
+<span class="fc" id="L302">        this.activityOnsalePoMapper.deleteByActIdEqualsAndOnsaleIdEquals(actId, onsaleId);</span>
+<span class="fc" id="L303">        return String.format(ACTIVITY_LIST_KEY, onsaleId);</span>
+    }
+
+    /**
+     * 根据shopId和productId查询所有有效的活动
+     * null则不作为条件查询
+     *
+     * @param shopId    商铺id
+     * @param productId 商品id
+     * @param beginTime 活动结束时间段的起
+     * @param endTime   活动结束时间段的止
+     * @return 分页的查询结果
+     */
+    public &lt;T extends Activity&gt; List&lt;T&gt; retrieveValidByShopIdAndProductId(Long shopId, Long productId, String actClass,
+                                                                          LocalDateTime beginTime, LocalDateTime endTime, Integer page, Integer pageSize) {
+<span class="pc bpc" id="L318" title="5 of 10 branches missed.">        if (null == actClass || page &lt; 0 || pageSize &lt;= 0 || Objects.isNull(beginTime) || Objects.isNull(endTime)) {</span>
+<span class="nc" id="L319">            logger.error(</span>
+                    &quot;retrieveValidByShopIdAndProductId: actClass, page, pageSize, beginTime, endTime can not be null&quot;);
+<span class="nc" id="L321">            throw new IllegalArgumentException(</span>
+                    &quot;ActivityDao.retrieveValidByShopIdAndProductId: page and pageSize can not be zero. and actClass cannot be null&quot;);
+        }
+
+<span class="fc" id="L325">        Pageable pageable = PageRequest.of(page - 1, pageSize);</span>
+        List&lt;ActivityPo&gt; pos;
+<span class="fc bfc" id="L327" title="All 2 branches covered.">        if (null != productId) {</span>
+<span class="fc" id="L328">            logger.debug(&quot;retrieveValidByShopIdAndProductId: productId = {}&quot;, productId);</span>
+<span class="fc" id="L329">            pos = this.activityPoMapper.findValidByActClassEqualsAndProductIdEquals(actClass, productId, beginTime,</span>
+                    endTime, pageable);
+        } else {
+<span class="fc bfc" id="L332" title="All 2 branches covered.">            if (null != shopId) {</span>
+<span class="fc" id="L333">                logger.debug(&quot;retrieveValidByShopIdAndProductId: shopId = {}&quot;, shopId);</span>
+<span class="fc" id="L334">                pos = this.activityPoMapper.findValidByActClassEqualsAndShopIdEquals(actClass, shopId, beginTime,</span>
+                        endTime, pageable);
+
+            } else {
+<span class="fc" id="L338">                logger.debug(&quot;retrieveValidByShopIdAndProductId: shopId is null&quot;);</span>
+<span class="fc" id="L339">                pos = this.activityPoMapper.findValidByActClassEquals(actClass, beginTime, endTime, pageable);</span>
+            }
+        }
+<span class="fc" id="L342">        logger.debug(&quot;retrieveValidByShopIdAndProductId: pos size = {}&quot;, pos.size());</span>
+<span class="fc bfc" id="L343" title="All 2 branches covered.">        if (pos.size() != 0) {</span>
+<span class="fc" id="L344">            List&lt;T&gt; actList = pos.stream().map(po -&gt; {</span>
+<span class="fc" id="L345">                T bo = (T) this.build(po, Optional.ofNullable(null));</span>
+<span class="fc" id="L346">                logger.debug(&quot;retrieveValidByShopIdAndProductId: bo = {}&quot;, bo);</span>
+<span class="fc" id="L347">                return bo;</span>
+<span class="fc" id="L348">            }).collect(Collectors.toList());</span>
+<span class="fc" id="L349">            return actList;</span>
+        } else {
+<span class="fc" id="L351">            return new ArrayList&lt;&gt;();</span>
+        }
+    }
+
+    /**
+     * 根据shopId和productId查询所有的活动
+     * productId为null则不作为条件查询
+     *
+     * @param shopId    商铺id
+     * @param productId 商品id
+     * @param actClass  活动类型
+     * @param status    状态
+     * @param page      页码
+     * @param pageSize  每页数目
+     * @return 分页的查询结果
+     * #
+     */
+    public &lt;T extends Activity&gt; List&lt;T&gt; retrieveByShopIdAndProductId(Long shopId, Long productId, String actClass,
+                                                                     Integer status, Integer page, Integer pageSize) {
+<span class="pc bpc" id="L370" title="2 of 4 branches missed.">        assert (page &gt; 0 &amp;&amp; pageSize &gt; 0) : new IllegalArgumentException();</span>
+<span class="fc" id="L371">        logger.debug(&quot;retrieveByShopIdAndProductId: shopId = {}, productId = {}, page = {}, pageSize= {}&quot;, shopId,</span>
+                productId, page, pageSize);
+        // JPA从第0页开始
+<span class="fc" id="L374">        Pageable pageable = PageRequest.of(page - 1, pageSize);</span>
+        List&lt;ActivityPo&gt; pos;
+<span class="fc bfc" id="L376" title="All 2 branches covered.">        if (null != productId) {</span>
+<span class="fc" id="L377">            logger.debug(&quot;retrieveByShopIdAndProductId: productId = {}&quot;, productId);</span>
+<span class="fc" id="L378">            pos = this.activityPoMapper.findByActClassEqualsAndProductIdEqualsAndStatusEquals(actClass, productId,</span>
+                    status, pageable);
+        } else {
+<span class="pc bpc" id="L381" title="1 of 2 branches missed.">            if (null != shopId) {</span>
+<span class="fc bfc" id="L382" title="All 2 branches covered.">                if (PLATFORM != shopId) {</span>
+<span class="fc bfc" id="L383" title="All 2 branches covered.">                    if (null != status) {</span>
+<span class="fc" id="L384">                        logger.debug(&quot;retrieveByShopIdAndProductId: actClass &amp; shopId &amp; status&quot;);</span>
+<span class="fc" id="L385">                        pos = this.activityPoMapper.findByActClassEqualsAndShopIdEqualsAndStatusEquals(actClass, shopId,</span>
+                                status, pageable);
+                    } else {
+<span class="fc" id="L388">                        logger.debug(&quot;retrieveByShopIdAndProductId: actClass &amp; shopId&quot;);</span>
+<span class="fc" id="L389">                        pos = this.activityPoMapper.findByActClassEqualsAndShopIdEquals(actClass, shopId, pageable);</span>
+                    }
+                } else {
+<span class="pc bpc" id="L392" title="1 of 2 branches missed.">                    if (null != status)</span>
+<span class="fc" id="L393">                        pos = this.activityPoMapper.findByActClassEqualsAndStatusEquals(actClass, status, pageable);</span>
+                    else
+<span class="nc" id="L395">                        pos = this.activityPoMapper.findByActClassEquals(actClass, pageable);</span>
+                }
+
+            } else {
+<span class="nc" id="L399">                logger.error(&quot;retrieveByShopIdAndProductId: shopId is null&quot;);</span>
+<span class="nc" id="L400">                pos = new ArrayList&lt;&gt;();</span>
+            }
+        }
+<span class="fc" id="L403">        logger.debug(&quot;retrieveByShopIdAndProductId: pos size = &quot; + pos.size());</span>
+<span class="fc" id="L404">        List&lt;T&gt; actList = pos.stream().map(po -&gt; {</span>
+<span class="fc bfc" id="L405" title="All 4 branches covered.">            if (!shopId.equals(po.getShopId()) &amp;&amp; !shopId.equals(PLATFORM)) {</span>
+<span class="fc" id="L406">                throw new BusinessException(ReturnNo.RESOURCE_ID_OUTSCOPE,</span>
+<span class="fc" id="L407">                        String.format(ReturnNo.RESOURCE_ID_OUTSCOPE.getMessage(), &quot;活动&quot;, po.getId(), shopId));</span>
+            }
+<span class="fc" id="L409">            T bo = (T) this.build(po, Optional.ofNullable(null));</span>
+<span class="fc" id="L410">            logger.debug(&quot;retrieveByShopIdAndProductId: bo = {}&quot;, bo);</span>
+<span class="fc" id="L411">            return bo;</span>
+<span class="fc" id="L412">        }).collect(Collectors.toList());</span>
+<span class="fc" id="L413">        logger.debug(&quot;retrieveByShopIdAndProductId: actList_size = {}&quot;, actList.size());</span>
+<span class="fc" id="L414">        return actList;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

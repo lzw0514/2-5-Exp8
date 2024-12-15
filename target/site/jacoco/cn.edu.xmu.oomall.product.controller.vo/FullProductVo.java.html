@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FullProductVo.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">product</a> &gt; <a href="index.source.html" class="el_package">cn.edu.xmu.oomall.product.controller.vo</a> &gt; <span class="el_source">FullProductVo.java</span></div><h1>FullProductVo.java</h1><pre class="source lang-java linenums">package cn.edu.xmu.oomall.product.controller.vo;
+
+import cn.edu.xmu.javaee.core.aop.CopyFrom;
+import cn.edu.xmu.javaee.core.model.vo.IdNameTypeVo;
+import cn.edu.xmu.javaee.core.util.CloneFactory;
+import cn.edu.xmu.oomall.product.dao.bo.Product;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
+
+/**
+ * @author wuzhicheng
+ * @create 2022-12-04 12:19
+ */
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@NoArgsConstructor
+@CopyFrom({Product.class})
+public class FullProductVo {
+    private Long id;
+    private IdNameTypeVo shop;
+    private List&lt;IdNameTypeVo&gt; otherProducts;
+    private String name;
+    private String skuSn;
+    private Long originalPrice;
+    private Long weight;
+    private Byte status;
+    private String unit;
+    private String barCode;
+    private String originPlace;
+    private Long freeThreshold;
+    private Integer commissionRatio;
+    private IdNameTypeVo category;
+    private IdNameTypeVo template;
+    private IdNameTypeVo shopLogistic;
+    private IdNameTypeVo creator;
+    private IdNameTypeVo modifier;
+    private LocalDateTime gmtCreate;
+    private LocalDateTime gmtModified;
+
+    public FullProductVo(Product product){
+<span class="fc" id="L44">        super();</span>
+<span class="fc" id="L45">        CloneFactory.copy(this, product);</span>
+        //设置返回对象属性
+<span class="fc" id="L47">        this.setShop1(IdNameTypeVo.builder().id(product.getShop().getId()).name(product.getShop().getName()).build());</span>
+<span class="fc" id="L48">        this.setOtherProducts1(product.getOtherProduct().stream().map(o -&gt; IdNameTypeVo.builder().id(o.getId()).name(o.getName()).build()).collect(Collectors.toList()));</span>
+<span class="fc" id="L49">        this.setCategory1(IdNameTypeVo.builder().id(product.getCategory().getId()).name(product.getCategory().getName()).build());</span>
+<span class="pc bpc" id="L50" title="1 of 2 branches missed.">        if(product.getLogistics() != null) {</span>
+<span class="nc" id="L51">            this.setShopLogistic1(IdNameTypeVo.builder().id(product.getLogistics().getId()).name(product.getLogistics().getName()).build());</span>
+        }
+<span class="fc" id="L53">        this.setTemplate1(IdNameTypeVo.builder().id(product.getTemplate().getId()).name(product.getTemplate().getName()).build());</span>
+<span class="fc" id="L54">        this.setCreator(IdNameTypeVo.builder().id(product.getCreatorId()).name(product.getCreatorName()).build());</span>
+<span class="fc" id="L55">        this.setModifier(IdNameTypeVo.builder().id(product.getModifierId()).name(product.getModifierName()).build());</span>
+<span class="fc" id="L56">    }</span>
+
+    public Long getId() {
+<span class="fc" id="L59">        return id;</span>
+    }
+
+    public void setId(Long id) {
+<span class="fc" id="L63">        this.id = id;</span>
+<span class="fc" id="L64">    }</span>
+
+    public IdNameTypeVo getShop() {
+<span class="fc" id="L67">        return shop;</span>
+    }
+
+    public void setShop1(IdNameTypeVo shop) {
+<span class="fc" id="L71">        this.shop = shop;</span>
+<span class="fc" id="L72">    }</span>
+
+    public List&lt;IdNameTypeVo&gt; getOtherProducts() {
+<span class="fc" id="L75">        return otherProducts;</span>
+    }
+
+    public void setOtherProducts1(List&lt;IdNameTypeVo&gt; otherProducts) {
+<span class="fc" id="L79">        this.otherProducts = otherProducts;</span>
+<span class="fc" id="L80">    }</span>
+
+    public String getName() {
+<span class="fc" id="L83">        return name;</span>
+    }
+
+    public void setName(String name) {
+<span class="fc" id="L87">        this.name = name;</span>
+<span class="fc" id="L88">    }</span>
+
+    public String getSkuSn() {
+<span class="fc" id="L91">        return skuSn;</span>
+    }
+
+    public void setSkuSn(String skuSn) {
+<span class="fc" id="L95">        this.skuSn = skuSn;</span>
+<span class="fc" id="L96">    }</span>
+
+    public Long getOriginalPrice() {
+<span class="fc" id="L99">        return originalPrice;</span>
+    }
+
+    public void setOriginalPrice(Long originalPrice) {
+<span class="fc" id="L103">        this.originalPrice = originalPrice;</span>
+<span class="fc" id="L104">    }</span>
+
+    public Long getWeight() {
+<span class="fc" id="L107">        return weight;</span>
+    }
+
+    public void setWeight(Long weight) {
+<span class="fc" id="L111">        this.weight = weight;</span>
+<span class="fc" id="L112">    }</span>
+
+    public Byte getStatus() {
+<span class="fc" id="L115">        return status;</span>
+    }
+
+    public void setStatus(Byte status) {
+<span class="fc" id="L119">        this.status = status;</span>
+<span class="fc" id="L120">    }</span>
+
+    public String getUnit() {
+<span class="fc" id="L123">        return unit;</span>
+    }
+
+    public void setUnit(String unit) {
+<span class="fc" id="L127">        this.unit = unit;</span>
+<span class="fc" id="L128">    }</span>
+
+    public String getBarCode() {
+<span class="fc" id="L131">        return barCode;</span>
+    }
+
+    public void setBarCode(String barCode) {
+<span class="nc" id="L135">        this.barCode = barCode;</span>
+<span class="nc" id="L136">    }</span>
+
+    public String getOriginPlace() {
+<span class="fc" id="L139">        return originPlace;</span>
+    }
+
+    public void setOriginPlace(String originPlace) {
+<span class="fc" id="L143">        this.originPlace = originPlace;</span>
+<span class="fc" id="L144">    }</span>
+
+    public Long getFreeThreshold() {
+<span class="fc" id="L147">        return freeThreshold;</span>
+    }
+
+    public void setFreeThreshold(Long freeThreshold) {
+<span class="fc" id="L151">        this.freeThreshold = freeThreshold;</span>
+<span class="fc" id="L152">    }</span>
+
+    public Integer getCommissionRatio() {
+<span class="fc" id="L155">        return commissionRatio;</span>
+    }
+
+    public void setCommissionRatio(Integer commissionRatio) {
+<span class="fc" id="L159">        this.commissionRatio = commissionRatio;</span>
+<span class="fc" id="L160">    }</span>
+
+    public IdNameTypeVo getCategory() {
+<span class="fc" id="L163">        return category;</span>
+    }
+
+    public void setCategory1(IdNameTypeVo category) {
+<span class="fc" id="L167">        this.category = category;</span>
+<span class="fc" id="L168">    }</span>
+
+    public IdNameTypeVo getShopLogistic() {
+<span class="fc" id="L171">        return shopLogistic;</span>
+    }
+
+    public void setShopLogistic1(IdNameTypeVo shopLogistic) {
+<span class="nc" id="L175">        this.shopLogistic= shopLogistic;</span>
+<span class="nc" id="L176">    }</span>
+
+    public IdNameTypeVo getTemplate() {
+<span class="fc" id="L179">        return template;</span>
+    }
+
+    public void setTemplate1(IdNameTypeVo template) {
+<span class="fc" id="L183">        this.template = template;</span>
+<span class="fc" id="L184">    }</span>
+
+    public IdNameTypeVo getCreator() {
+<span class="fc" id="L187">        return creator;</span>
+    }
+
+    public void setCreator(IdNameTypeVo creator) {
+<span class="fc" id="L191">        this.creator = creator;</span>
+<span class="fc" id="L192">    }</span>
+
+    public IdNameTypeVo getModifier() {
+<span class="fc" id="L195">        return modifier;</span>
+    }
+
+    public void setModifier(IdNameTypeVo modifier) {
+<span class="fc" id="L199">        this.modifier = modifier;</span>
+<span class="fc" id="L200">    }</span>
+
+    public LocalDateTime getGmtCreate() {
+<span class="fc" id="L203">        return gmtCreate;</span>
+    }
+
+    public void setGmtCreate(LocalDateTime gmtCreate) {
+<span class="fc" id="L207">        this.gmtCreate = gmtCreate;</span>
+<span class="fc" id="L208">    }</span>
+
+    public LocalDateTime getGmtModified() {
+<span class="fc" id="L211">        return gmtModified;</span>
+    }
+
+    public void setGmtModified(LocalDateTime gmtModified) {
+<span class="fc" id="L215">        this.gmtModified = gmtModified;</span>
+<span class="fc" id="L216">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

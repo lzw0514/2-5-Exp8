@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ProductVo.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">product</a> &gt; <a href="index.source.html" class="el_package">cn.edu.xmu.oomall.product.controller.vo</a> &gt; <span class="el_source">ProductVo.java</span></div><h1>ProductVo.java</h1><pre class="source lang-java linenums">//School of Informatics Xiamen University, GPL-3.0 license
+package cn.edu.xmu.oomall.product.controller.vo;
+
+import cn.edu.xmu.javaee.core.aop.CopyFrom;
+import cn.edu.xmu.javaee.core.model.vo.IdNameTypeVo;
+import cn.edu.xmu.javaee.core.util.CloneFactory;
+import cn.edu.xmu.oomall.product.dao.bo.Activity;
+import cn.edu.xmu.oomall.product.dao.bo.Category;
+import cn.edu.xmu.oomall.product.dao.bo.OnSale;
+import cn.edu.xmu.oomall.product.dao.bo.Product;
+import cn.edu.xmu.oomall.product.mapper.openfeign.po.Shop;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
+
+/**
+ * 商品视图对象
+ * @author Ming Qiu
+ **/
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@CopyFrom({Product.class, OnSale.class})
+public class ProductVo {
+
+    private Long id;
+    private String name;
+    private Byte status;
+    private String skuSn;
+    private Long originalPrice;
+    private Long weight;
+    private String barcode;
+    private String unit;
+    private String originPlace;
+    private List&lt;SimpleProductVo&gt; otherProduct;
+    private Long price;
+    private Integer quantity;
+    private Integer maxQuantity;
+    private LocalDateTime beginTime;
+    private LocalDateTime endTime;
+    private IdNameTypeVo shop;
+    private IdNameTypeVo category;
+    private Boolean shareable;
+    private Long freeThreshold;
+    private List&lt;IdNameTypeVo&gt; actList;
+    private IdNameTypeVo freightTemplate;
+
+
+
+    public ProductVo(Product product) {
+<span class="fc" id="L57">        super();</span>
+<span class="fc" id="L58">        CloneFactory.copy(this, product);</span>
+<span class="fc" id="L59">        CloneFactory.copy(this, product.getValidOnsale());</span>
+<span class="fc" id="L60">        this.setfreightTemplate(IdNameTypeVo.builder().id(product.getTemplate().getId()).name(product.getTemplate().getName()).build());</span>
+<span class="fc" id="L61">    }</span>
+
+    public Long getId() {
+<span class="fc" id="L64">        return id;</span>
+    }
+
+    @CopyFrom.Exclude({OnSale.class})
+    public void setId(Long id) {
+<span class="fc" id="L69">        this.id = id;</span>
+<span class="fc" id="L70">    }</span>
+
+    public String getName() {
+<span class="fc" id="L73">        return name;</span>
+    }
+
+    public void setName(String name) {
+<span class="fc" id="L77">        this.name = name;</span>
+<span class="fc" id="L78">    }</span>
+
+    public Byte getStatus() {
+<span class="fc" id="L81">        return status;</span>
+    }
+
+    public void setStatus(Byte status) {
+<span class="fc" id="L85">        this.status = status;</span>
+<span class="fc" id="L86">    }</span>
+
+    public String getSkuSn() {
+<span class="fc" id="L89">        return skuSn;</span>
+    }
+
+    public void setSkuSn(String skuSn) {
+<span class="fc" id="L93">        this.skuSn = skuSn;</span>
+<span class="fc" id="L94">    }</span>
+
+    public Long getOriginalPrice() {
+<span class="fc" id="L97">        return originalPrice;</span>
+    }
+
+    public void setOriginalPrice(Long originalPrice) {
+<span class="fc" id="L101">        this.originalPrice = originalPrice;</span>
+<span class="fc" id="L102">    }</span>
+
+    public Long getWeight() {
+<span class="fc" id="L105">        return weight;</span>
+    }
+
+    public void setWeight(Long weight) {
+<span class="fc" id="L109">        this.weight = weight;</span>
+<span class="fc" id="L110">    }</span>
+
+    public String getBarcode() {
+<span class="fc" id="L113">        return barcode;</span>
+    }
+
+    public void setBarcode(String barcode) {
+<span class="fc" id="L117">        this.barcode = barcode;</span>
+<span class="fc" id="L118">    }</span>
+
+    public String getUnit() {
+<span class="fc" id="L121">        return unit;</span>
+    }
+
+    public void setUnit(String unit) {
+<span class="fc" id="L125">        this.unit = unit;</span>
+<span class="fc" id="L126">    }</span>
+
+    public String getOriginPlace() {
+<span class="fc" id="L129">        return originPlace;</span>
+    }
+
+    public void setOriginPlace(String originPlace) {
+<span class="fc" id="L133">        this.originPlace = originPlace;</span>
+<span class="fc" id="L134">    }</span>
+
+    public List&lt;SimpleProductVo&gt; getOtherProduct() {
+<span class="fc" id="L137">        return otherProduct;</span>
+    }
+
+    public void setOtherProduct(List&lt;Product&gt; otherProduct) {
+<span class="fc" id="L141">        this.otherProduct = otherProduct.stream().map(o -&gt; new SimpleProductVo(o)).collect(Collectors.toList());</span>
+<span class="fc" id="L142">    }</span>
+
+    public Long getPrice() {
+<span class="fc" id="L145">        return price;</span>
+    }
+
+    public void setPrice(Long price) {
+<span class="fc" id="L149">        this.price = price;</span>
+<span class="fc" id="L150">    }</span>
+
+    public Integer getQuantity() {
+<span class="fc" id="L153">        return quantity;</span>
+    }
+
+    public void setQuantity(Integer quantity) {
+<span class="fc" id="L157">        this.quantity = quantity;</span>
+<span class="fc" id="L158">    }</span>
+
+    public Integer getMaxQuantity() {
+<span class="fc" id="L161">        return maxQuantity;</span>
+    }
+
+    public void setMaxQuantity(Integer maxQuantity) {
+<span class="fc" id="L165">        this.maxQuantity = maxQuantity;</span>
+<span class="fc" id="L166">    }</span>
+
+    public LocalDateTime getBeginTime() {
+<span class="fc" id="L169">        return beginTime;</span>
+    }
+
+    public void setBeginTime(LocalDateTime beginTime) {
+<span class="fc" id="L173">        this.beginTime = beginTime;</span>
+<span class="fc" id="L174">    }</span>
+
+    public LocalDateTime getEndTime() {
+<span class="fc" id="L177">        return endTime;</span>
+    }
+
+    public void setEndTime(LocalDateTime endTime) {
+<span class="fc" id="L181">        this.endTime = endTime;</span>
+<span class="fc" id="L182">    }</span>
+
+    public IdNameTypeVo getShop() {
+<span class="fc" id="L185">        return shop;</span>
+    }
+
+    public void setShop(Shop shop) {
+<span class="fc" id="L189">        this.shop = IdNameTypeVo.builder().id(shop.getId()).name(shop.getName()).build();</span>
+<span class="fc" id="L190">    }</span>
+<span class="fc" id="L191">    public IdNameTypeVo getfreightTemplate(){return freightTemplate;}</span>
+
+    public void setfreightTemplate(IdNameTypeVo freightTemplate) {
+<span class="fc" id="L194">        this.freightTemplate = freightTemplate;</span>
+<span class="fc" id="L195">    }</span>
+
+    public IdNameTypeVo getCategory() {
+<span class="fc" id="L198">        return category;</span>
+    }
+
+    public void setCategory(Category category) {
+<span class="fc" id="L202">        this.category = IdNameTypeVo.builder().id(category.getId()).name(category.getName()).build();</span>
+<span class="fc" id="L203">    }</span>
+
+
+    public Boolean getShareable() {
+<span class="fc" id="L207">        return shareable;</span>
+    }
+
+    public void setShareable(Boolean shareable) {
+<span class="nc" id="L211">        this.shareable = shareable;</span>
+<span class="nc" id="L212">    }</span>
+
+    public Long getFreeThreshold() {
+<span class="fc" id="L215">        return freeThreshold;</span>
+    }
+
+    public void setFreeThreshold(Long freeThreshold) {
+<span class="fc" id="L219">        this.freeThreshold = freeThreshold;</span>
+<span class="fc" id="L220">    }</span>
+
+    public List&lt;IdNameTypeVo&gt; getActList() {
+<span class="fc" id="L223">        return actList;</span>
+    }
+
+    public void setActList(List&lt;Activity&gt; actList) {
+<span class="fc" id="L227">        this.actList = actList.stream().map(o -&gt; IdNameTypeVo.builder().id(o.getId()).name(o.getName()).build()).collect(Collectors.toList());</span>
+<span class="fc" id="L228">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

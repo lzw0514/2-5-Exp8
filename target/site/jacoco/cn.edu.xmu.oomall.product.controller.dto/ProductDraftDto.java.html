@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ProductDraftDto.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">product</a> &gt; <a href="index.source.html" class="el_package">cn.edu.xmu.oomall.product.controller.dto</a> &gt; <span class="el_source">ProductDraftDto.java</span></div><h1>ProductDraftDto.java</h1><pre class="source lang-java linenums">//School of Informatics Xiamen University, GPL-3.0 license
+package cn.edu.xmu.oomall.product.controller.dto;
+
+import cn.edu.xmu.javaee.core.validation.NewGroup;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.NoArgsConstructor;
+
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
+
+/**
+ * @author wuzhicheng
+ * @create 2022-12-04 11:04
+ */
+@NoArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class ProductDraftDto {
+    @NotNull(message = &quot;名称不能为空&quot;, groups = {NewGroup.class})
+    private String name;
+
+    @Min(value = 0, message = &quot;原价不能小于0&quot;)
+    @NotNull(message = &quot;原价不能为空&quot;, groups = {NewGroup.class})
+    private Long originalPrice;
+
+    @NotNull(message = &quot;分类不能为空&quot;, groups = {NewGroup.class})
+    private Long categoryId;
+
+    private String unit;
+
+    private String originPlace;
+
+    public String getName() {
+<span class="fc" id="L33">        return name;</span>
+    }
+
+    public void setName(String name) {
+<span class="fc" id="L37">        this.name = name;</span>
+<span class="fc" id="L38">    }</span>
+
+    public Long getOriginalPrice() {
+<span class="fc" id="L41">        return originalPrice;</span>
+    }
+
+    public void setOriginalPrice(Long originalPrice) {
+<span class="fc" id="L45">        this.originalPrice = originalPrice;</span>
+<span class="fc" id="L46">    }</span>
+
+    public Long getCategoryId() {
+<span class="fc" id="L49">        return categoryId;</span>
+    }
+
+    public void setCategoryId(Long categoryId) {
+<span class="fc" id="L53">        this.categoryId = categoryId;</span>
+<span class="fc" id="L54">    }</span>
+
+    public String getUnit() {
+<span class="fc" id="L57">        return unit;</span>
+    }
+
+    public void setUnit(String unit) {
+<span class="fc" id="L61">        this.unit = unit;</span>
+<span class="fc" id="L62">    }</span>
+
+    public String getOriginPlace() {
+<span class="fc" id="L65">        return originPlace;</span>
+    }
+
+    public void setOriginPlace(String originPlace) {
+<span class="fc" id="L69">        this.originPlace = originPlace;</span>
+<span class="fc" id="L70">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

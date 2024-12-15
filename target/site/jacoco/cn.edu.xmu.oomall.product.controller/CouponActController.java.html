@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CouponActController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">product</a> &gt; <a href="index.source.html" class="el_package">cn.edu.xmu.oomall.product.controller</a> &gt; <span class="el_source">CouponActController.java</span></div><h1>CouponActController.java</h1><pre class="source lang-java linenums">//School of Informatics Xiamen University, GPL-3.0 license
+package cn.edu.xmu.oomall.product.controller;
+
+import cn.edu.xmu.javaee.core.model.ReturnObject;
+import cn.edu.xmu.javaee.core.model.vo.PageVo;
+import cn.edu.xmu.javaee.core.util.CloneFactory;
+import cn.edu.xmu.oomall.product.controller.vo.*;
+import cn.edu.xmu.oomall.product.controller.dto.OrderInfoDto;
+import cn.edu.xmu.oomall.product.dao.bo.CouponAct;
+import cn.edu.xmu.oomall.product.dao.bo.Product;
+import cn.edu.xmu.oomall.product.model.strategy.Item;
+import cn.edu.xmu.oomall.product.service.CouponActService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static cn.edu.xmu.javaee.core.model.Constants.PLATFORM;
+
+@RestController /*Restful的Controller对象*/
+@RequestMapping(produces = &quot;application/json;charset=UTF-8&quot;)
+@RequiredArgsConstructor
+<span class="fc" id="L33">@Slf4j</span>
+public class CouponActController {
+
+    private final CouponActService couponActService;
+
+    /**
+     * 计算优惠
+     * @author Liang nan
+     */
+    /**
+     * 计算商品优惠价格
+     * 2023-12-09
+     * @author yuhao shi
+     * dgn2-010
+     */
+    @PostMapping(&quot;/couponactivities/{id}/caculate&quot;)
+    public ReturnObject cacuCoupon(@PathVariable(&quot;id&quot;) Long id,
+                                   @Validated @RequestBody List&lt;OrderInfoDto&gt; orderInfoDtoList) {
+
+<span class="fc" id="L52">        List&lt;Item&gt; itemList =this.couponActService.cacuCoupon(id, orderInfoDtoList);</span>
+<span class="fc" id="L53">        return new ReturnObject(itemList.stream().map(item -&gt; CloneFactory.copy(new DiscountVo(), item)).collect(Collectors.toList()));</span>
+    }
+
+    /**
+     * 查看上线的优惠活动列表
+     * 注：在beginTime和endTime参数添加注解@DateTimeFormat(iso=DateTimeFormat.ISO.DATE_TIME)，规定前端传入的时间格式
+     *
+     * @param shopId
+     * @param productId
+     * @param beginTime
+     * @param endTime
+     * @param page
+     * @param pageSize
+     *
+     */
+    @GetMapping(&quot;/couponactivities&quot;)
+    @Transactional(propagation = Propagation.REQUIRED)
+    public ReturnObject findAllOnlineCouponActivities(@RequestParam(required = false) Long shopId,
+                                                               @RequestParam(required = false) Long productId,
+                                                               @RequestParam(required = false)@DateTimeFormat(iso=DateTimeFormat.ISO.DATE_TIME) LocalDateTime beginTime,
+                                                               @RequestParam(required = false)@DateTimeFormat(iso=DateTimeFormat.ISO.DATE_TIME) LocalDateTime endTime,
+                                                               @RequestParam(required = false, defaultValue = &quot;1&quot;) Integer page,
+                                                               @RequestParam(required = false, defaultValue = &quot;10&quot;) Integer pageSize){
+<span class="fc" id="L76">        List&lt;CouponAct&gt; acts = this.couponActService.retrieveValidByShopIdAndProductIdAndTime(shopId, productId, beginTime, endTime, page, pageSize);</span>
+<span class="fc" id="L77">        List&lt;SimpleCouponActVo&gt; dtos = acts.stream().map(o -&gt; CloneFactory.copy(new SimpleCouponActVo(), o)).collect(Collectors.toList());</span>
+<span class="fc" id="L78">        return new ReturnObject(new PageVo&lt;&gt;(dtos, page, pageSize));</span>
+    }
+
+    /**
+     * 查看优惠活动
+     *
+     * @param id
+     *
+     */
+    @GetMapping(&quot;/couponactivities/{id}&quot;)
+    @Transactional(propagation = Propagation.REQUIRED)
+    public ReturnObject findCouponActById(@PathVariable Long id){
+<span class="fc" id="L90">        CouponAct act = this.couponActService.findById(PLATFORM, id);</span>
+<span class="fc" id="L91">        return new ReturnObject(CloneFactory.copy(new CouponActVo(),act));</span>
+    }
+
+    /**
+     * 查看优惠活动中的商品列表
+     *
+     * @param id
+     * @param page  (not required)
+     * @param pageSize  (not required)
+     *
+     */
+    @GetMapping(&quot;/couponactivities/{id}/products&quot;)
+    @Transactional(propagation = Propagation.REQUIRED)
+    public ReturnObject findCouponActProductById(@PathVariable Long id,
+                                                          @RequestParam(required = false, defaultValue = &quot;1&quot;) Integer page,
+                                                          @RequestParam(required = false, defaultValue = &quot;10&quot;) Integer pageSize) {
+
+<span class="fc" id="L108">        List&lt;Product&gt; products = this.couponActService.retrieveProduct(id);</span>
+<span class="fc" id="L109">        List&lt;SimpleProductVo&gt; dtos = products.stream().map(product -&gt; new SimpleProductVo(product)).collect(Collectors.toList());</span>
+<span class="fc" id="L110">        return new ReturnObject(new PageVo&lt;&gt;(dtos.subList((page-1) * pageSize, Math.min(dtos.size(), page * pageSize)), page, pageSize));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

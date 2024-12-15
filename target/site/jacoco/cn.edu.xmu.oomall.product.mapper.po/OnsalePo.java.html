@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OnsalePo.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">product</a> &gt; <a href="index.source.html" class="el_package">cn.edu.xmu.oomall.product.mapper.po</a> &gt; <span class="el_source">OnsalePo.java</span></div><h1>OnsalePo.java</h1><pre class="source lang-java linenums">//School of Informatics Xiamen University, GPL-3.0 license
+
+package cn.edu.xmu.oomall.product.mapper.po;
+
+import cn.edu.xmu.javaee.core.aop.CopyFrom;
+import cn.edu.xmu.oomall.product.dao.bo.OnSale;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
+
+import jakarta.persistence.*;
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = &quot;goods_onsale&quot;)
+@AllArgsConstructor
+@NoArgsConstructor
+@CopyFrom({OnSale.class})
+@ToString
+public class OnsalePo {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    /**
+     * 创建者id
+     */
+    private Long creatorId;
+
+    /**
+     * 创建者
+     */
+    private String creatorName;
+
+    /**
+     * 修改者id
+     */
+    private Long modifierId;
+
+    /**
+     * 修改者
+     */
+    private String modifierName;
+
+    /**
+     * 创建时间
+     */
+    private LocalDateTime gmtCreate;
+    /**
+     * 修改时间
+     */
+    private LocalDateTime gmtModified;
+
+    private Long shopId;
+
+    private Long productId;
+
+    private Long price;
+
+    private LocalDateTime beginTime;
+
+    private LocalDateTime endTime;
+
+    private Integer quantity;
+
+    private Byte type;
+
+    private Integer maxQuantity;
+
+    private LocalDateTime payTime;
+
+    private Long deposit;
+
+    public Long getId() {
+<span class="fc" id="L74">        return id;</span>
+    }
+
+    public void setId(Long id) {
+<span class="fc" id="L78">        this.id = id;</span>
+<span class="fc" id="L79">    }</span>
+
+    public Long getCreatorId() {
+<span class="fc" id="L82">        return creatorId;</span>
+    }
+
+    public void setCreatorId(Long creatorId) {
+<span class="fc" id="L86">        this.creatorId = creatorId;</span>
+<span class="fc" id="L87">    }</span>
+
+    public String getCreatorName() {
+<span class="fc" id="L90">        return creatorName;</span>
+    }
+
+    public void setCreatorName(String creatorName) {
+<span class="fc" id="L94">        this.creatorName = creatorName;</span>
+<span class="fc" id="L95">    }</span>
+
+    public Long getModifierId() {
+<span class="fc" id="L98">        return modifierId;</span>
+    }
+
+    public void setModifierId(Long modifierId) {
+<span class="fc" id="L102">        this.modifierId = modifierId;</span>
+<span class="fc" id="L103">    }</span>
+
+    public String getModifierName() {
+<span class="fc" id="L106">        return modifierName;</span>
+    }
+
+    public void setModifierName(String modifierName) {
+<span class="fc" id="L110">        this.modifierName = modifierName;</span>
+<span class="fc" id="L111">    }</span>
+
+    public LocalDateTime getGmtCreate() {
+<span class="fc" id="L114">        return gmtCreate;</span>
+    }
+
+    public void setGmtCreate(LocalDateTime gmtCreate) {
+<span class="fc" id="L118">        this.gmtCreate = gmtCreate;</span>
+<span class="fc" id="L119">    }</span>
+
+    public LocalDateTime getGmtModified() {
+<span class="fc" id="L122">        return gmtModified;</span>
+    }
+
+    public void setGmtModified(LocalDateTime gmtModified) {
+<span class="fc" id="L126">        this.gmtModified = gmtModified;</span>
+<span class="fc" id="L127">    }</span>
+
+    public Long getShopId() {
+<span class="fc" id="L130">        return shopId;</span>
+    }
+
+    public void setShopId(Long shopId) {
+<span class="fc" id="L134">        this.shopId = shopId;</span>
+<span class="fc" id="L135">    }</span>
+
+    public Long getProductId() {
+<span class="fc" id="L138">        return productId;</span>
+    }
+
+    public void setProductId(Long productId) {
+<span class="fc" id="L142">        this.productId = productId;</span>
+<span class="fc" id="L143">    }</span>
+
+    public Long getPrice() {
+<span class="fc" id="L146">        return price;</span>
+    }
+
+    public void setPrice(Long price) {
+<span class="fc" id="L150">        this.price = price;</span>
+<span class="fc" id="L151">    }</span>
+
+    public LocalDateTime getBeginTime() {
+<span class="fc" id="L154">        return beginTime;</span>
+    }
+
+    public void setBeginTime(LocalDateTime beginTime) {
+<span class="fc" id="L158">        this.beginTime = beginTime;</span>
+<span class="fc" id="L159">    }</span>
+
+    public LocalDateTime getEndTime() {
+<span class="fc" id="L162">        return endTime;</span>
+    }
+
+    public void setEndTime(LocalDateTime endTime) {
+<span class="fc" id="L166">        this.endTime = endTime;</span>
+<span class="fc" id="L167">    }</span>
+
+    public Integer getQuantity() {
+<span class="fc" id="L170">        return quantity;</span>
+    }
+
+    public void setQuantity(Integer quantity) {
+<span class="fc" id="L174">        this.quantity = quantity;</span>
+<span class="fc" id="L175">    }</span>
+
+    public Byte getType() {
+<span class="fc" id="L178">        return type;</span>
+    }
+
+    public void setType(Byte type) {
+<span class="fc" id="L182">        this.type = type;</span>
+<span class="fc" id="L183">    }</span>
+
+    public Integer getMaxQuantity() {
+<span class="fc" id="L186">        return maxQuantity;</span>
+    }
+
+    public void setMaxQuantity(Integer maxQuantity) {
+<span class="fc" id="L190">        this.maxQuantity = maxQuantity;</span>
+<span class="fc" id="L191">    }</span>
+
+    public LocalDateTime getPayTime() {
+<span class="fc" id="L194">        return payTime;</span>
+    }
+
+    public void setPayTime(LocalDateTime payTime) {
+<span class="fc" id="L198">        this.payTime = payTime;</span>
+<span class="fc" id="L199">    }</span>
+
+    public Long getDeposit() {
+<span class="fc" id="L202">        return deposit;</span>
+    }
+
+    public void setDeposit(Long deposit) {
+<span class="fc" id="L206">        this.deposit = deposit;</span>
+<span class="fc" id="L207">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ProductDraft.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">product</a> &gt; <a href="index.source.html" class="el_package">cn.edu.xmu.oomall.product.dao.bo</a> &gt; <span class="el_source">ProductDraft.java</span></div><h1>ProductDraft.java</h1><pre class="source lang-java linenums">//School of Informatics Xiamen University, GPL-3.0 license
+
+package cn.edu.xmu.oomall.product.dao.bo;
+
+import cn.edu.xmu.javaee.core.aop.CopyFrom;
+import cn.edu.xmu.javaee.core.exception.BusinessException;
+import cn.edu.xmu.javaee.core.model.ReturnNo;
+import cn.edu.xmu.javaee.core.model.bo.OOMallObject;
+import cn.edu.xmu.javaee.core.model.dto.UserDto;
+import cn.edu.xmu.javaee.core.model.returnval.TwoTuple;
+import cn.edu.xmu.javaee.core.util.CloneFactory;
+import cn.edu.xmu.oomall.product.dao.CategoryDao;
+import cn.edu.xmu.oomall.product.dao.ProductDao;
+import cn.edu.xmu.oomall.product.dao.ProductDraftDao;
+import cn.edu.xmu.oomall.product.dao.openfeign.ShopDao;
+import cn.edu.xmu.oomall.product.mapper.openfeign.po.Shop;
+import cn.edu.xmu.oomall.product.mapper.po.ProductDraftPo;
+import cn.edu.xmu.oomall.product.controller.dto.ProductDraftDto;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.Serializable;
+import java.time.LocalDateTime;
+
+@NoArgsConstructor
+@ToString(callSuper = true, doNotUseGetters = true)
+@CopyFrom({ ProductDraftDto.class, ProductDraftPo.class })
+public class ProductDraft extends OOMallObject implements Serializable {
+
+    @ToString.Exclude
+    @JsonIgnore
+<span class="fc" id="L34">    private final static Logger logger = LoggerFactory.getLogger(ProductDraft.class);</span>
+
+<span class="fc" id="L36">    private final static Long NO_ORIGIN_PRODUCT = 0L;</span>
+
+    @Setter
+    @ToString.Exclude
+    @JsonIgnore
+    private ProductDraftDao productDraftDao;
+
+    @ToString.Exclude
+    @Setter
+    @JsonIgnore
+    private CategoryDao categoryDao;
+
+    private String name;
+
+    private Long originalPrice;
+
+    private String originPlace;
+
+    private Long shopId;
+    private String unit;
+
+    public String getUnit() {
+<span class="fc" id="L58">        return unit;</span>
+    }
+
+    public void setUnit(String unit) {
+<span class="fc" id="L62">        this.unit = unit;</span>
+<span class="fc" id="L63">    }</span>
+
+    public void setShopId(Long shopId) {
+<span class="fc" id="L66">        this.shopId = shopId;</span>
+<span class="fc" id="L67">    }</span>
+
+    public Long getShopId() {
+<span class="fc" id="L70">        return shopId;</span>
+    }
+
+    @Setter
+    @JsonIgnore
+    @ToString.Exclude
+    private ShopDao shopDao;
+
+    @JsonIgnore
+    @ToString.Exclude
+    private Shop shop;
+
+    public Shop getShop() {
+<span class="pc bpc" id="L83" title="2 of 4 branches missed.">        if (this.shop == null &amp;&amp; this.shopDao != null) {</span>
+<span class="fc" id="L84">            this.shop = this.shopDao.findById(this.shopId);</span>
+        }
+<span class="fc" id="L86">        return this.shop;</span>
+    }
+
+    @JsonIgnore
+    private Long categoryId;
+
+    public void setCategoryId(Long categoryId) {
+<span class="fc" id="L93">        this.categoryId = categoryId;</span>
+<span class="fc" id="L94">    }</span>
+
+    public Long getCategoryId() {
+<span class="fc" id="L97">        return categoryId;</span>
+    }
+
+    public Category getCategory() {
+<span class="pc bpc" id="L101" title="1 of 2 branches missed.">        if (this.categoryId == null) {</span>
+<span class="fc" id="L102">            return null;</span>
+        }
+
+<span class="nc bnc" id="L105" title="All 4 branches missed.">        if (null == this.category &amp;&amp; null != this.categoryDao) {</span>
+            try {
+<span class="nc" id="L107">                this.category = this.categoryDao.findById(this.categoryId);</span>
+<span class="nc" id="L108">            } catch (BusinessException e) {</span>
+<span class="nc bnc" id="L109" title="All 2 branches missed.">                if (ReturnNo.RESOURCE_ID_NOTEXIST == e.getErrno()) {</span>
+<span class="nc" id="L110">                    this.categoryId = null;</span>
+<span class="nc" id="L111">                    logger.error(&quot;getCategory: product(id = {})'s categoryId is invalid.&quot;, id);</span>
+                }
+<span class="nc" id="L113">            }</span>
+        }
+<span class="nc" id="L115">        return this.category;</span>
+    }
+
+    @JsonIgnore
+    @ToString.Exclude
+    private Category category;
+
+    private Long productId;
+
+    public void setProductId(Long productId) {
+<span class="fc" id="L125">        this.productId = productId;</span>
+<span class="fc" id="L126">    }</span>
+
+    public Long getProductId() {
+<span class="fc" id="L129">        return productId;</span>
+    }
+
+    @JsonIgnore
+    @ToString.Exclude
+    private Product product;
+
+    @Setter
+    @JsonIgnore
+    @ToString.Exclude
+    private ProductDao productDao;
+
+    public Product getProduct() {
+<span class="pc bpc" id="L142" title="1 of 2 branches missed.">        if (this.productId == null) {</span>
+<span class="nc" id="L143">            return null;</span>
+        }
+
+<span class="pc bpc" id="L146" title="2 of 4 branches missed.">        if (this.product == null &amp;&amp; this.productDao != null) {</span>
+<span class="fc" id="L147">            this.product = this.productDao.findNoOnsaleById(this.shopId, this.productId);</span>
+        }
+<span class="fc" id="L149">        return this.product;</span>
+    }
+
+    /**
+     * 发布商品
+     * 
+     * @param commissionRatio 分账比例（可以为空）
+     * @param user            操作者
+     * @return 修改或新增的Product以及修改的Redis key
+     */
+    public TwoTuple&lt;Product, String&gt; publish(Integer commissionRatio, UserDto user) {
+<span class="nc" id="L160">        String key = null;</span>
+<span class="nc" id="L161">        Product retObj = null;</span>
+<span class="nc" id="L162">        Product productVal = CloneFactory.copy(new Product(), this);</span>
+<span class="nc" id="L163">        productVal.setCommissionRatio(commissionRatio);</span>
+<span class="nc bnc" id="L164" title="All 2 branches missed.">        if (NO_ORIGIN_PRODUCT == this.productId) {</span>
+            // 新增的货品
+<span class="nc" id="L166">            productVal.setStatus(Product.ONSHELF);</span>
+<span class="nc" id="L167">            productVal.setGoodsId(Product.NO_RELATE_PRODUCT);</span>
+<span class="nc" id="L168">            retObj = this.productDao.insert(productVal, user);</span>
+        } else {
+            // 修改货品
+<span class="nc" id="L171">            productVal.setId(this.productId);</span>
+<span class="nc" id="L172">            key = this.productDao.save(productVal, user);</span>
+<span class="nc" id="L173">            retObj = productVal;</span>
+        }
+<span class="nc" id="L175">        this.productDraftDao.delete(id);</span>
+<span class="nc" id="L176">        return new TwoTuple&lt;&gt;(retObj, key);</span>
+    }
+
+    public Long getId() {
+<span class="fc" id="L180">        return id;</span>
+    }
+
+    public void setId(Long id) {
+<span class="fc" id="L184">        this.id = id;</span>
+<span class="fc" id="L185">    }</span>
+
+    public Long getCreatorId() {
+<span class="fc" id="L188">        return creatorId;</span>
+    }
+
+    public void setCreatorId(Long creatorId) {
+<span class="fc" id="L192">        this.creatorId = creatorId;</span>
+<span class="fc" id="L193">    }</span>
+
+    public String getCreatorName() {
+<span class="fc" id="L196">        return creatorName;</span>
+    }
+
+    public void setCreatorName(String creatorName) {
+<span class="fc" id="L200">        this.creatorName = creatorName;</span>
+<span class="fc" id="L201">    }</span>
+
+    public Long getModifierId() {
+<span class="fc" id="L204">        return modifierId;</span>
+    }
+
+    public void setModifierId(Long modifierId) {
+<span class="fc" id="L208">        this.modifierId = modifierId;</span>
+<span class="fc" id="L209">    }</span>
+
+    public String getModifierName() {
+<span class="fc" id="L212">        return modifierName;</span>
+    }
+
+    public void setModifierName(String modifierName) {
+<span class="fc" id="L216">        this.modifierName = modifierName;</span>
+<span class="fc" id="L217">    }</span>
+
+    public LocalDateTime getGmtCreate() {
+<span class="fc" id="L220">        return gmtCreate;</span>
+    }
+
+    public void setGmtCreate(LocalDateTime gmtCreate) {
+<span class="fc" id="L224">        this.gmtCreate = gmtCreate;</span>
+<span class="fc" id="L225">    }</span>
+
+    public LocalDateTime getGmtModified() {
+<span class="fc" id="L228">        return gmtModified;</span>
+    }
+
+    public void setGmtModified(LocalDateTime gmtModified) {
+<span class="fc" id="L232">        this.gmtModified = gmtModified;</span>
+<span class="fc" id="L233">    }</span>
+
+    public String getName() {
+<span class="fc" id="L236">        return name;</span>
+    }
+
+    public void setName(String name) {
+<span class="fc" id="L240">        this.name = name;</span>
+<span class="fc" id="L241">    }</span>
+
+    public Long getOriginalPrice() {
+<span class="fc" id="L244">        return originalPrice;</span>
+    }
+
+    public void setOriginalPrice(Long originalPrice) {
+<span class="fc" id="L248">        this.originalPrice = originalPrice;</span>
+<span class="fc" id="L249">    }</span>
+
+    public String getOriginPlace() {
+<span class="fc" id="L252">        return originPlace;</span>
+    }
+
+    public void setOriginPlace(String originPlace) {
+<span class="fc" id="L256">        this.originPlace = originPlace;</span>
+<span class="fc" id="L257">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

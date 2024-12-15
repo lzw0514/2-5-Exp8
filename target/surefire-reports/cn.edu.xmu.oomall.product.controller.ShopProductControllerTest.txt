@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: cn.edu.xmu.oomall.product.controller.ShopProductControllerTest
+-------------------------------------------------------------------------------
+Tests run: 22, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 11.76 s -- in cn.edu.xmu.oomall.product.controller.ShopProductControllerTest
