@@ -1,3 +1,6 @@
+//不调用商铺模块的ShopMapper方法
+
+
 //School of Informatics Xiamen University, GPL-3.0 license
 package cn.edu.xmu.oomall.product.mapper.openfeign;
 
